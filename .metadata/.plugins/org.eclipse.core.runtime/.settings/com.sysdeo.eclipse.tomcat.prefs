@@ -1,0 +1,7 @@
+computeSourcePath=true
+contextsDir=D\:\\Java\\apache-tomcat-7.0.29\\conf\\Catalina\\localhost
+eclipse.preferences.version=1
+fixTomcatHomeBug=fixed
+tomcatConfigFile=D\:\\Java\\apache-tomcat-7.0.29\\conf\\server.xml
+tomcatDir=D\:\\Java\\apache-tomcat-7.0.29
+tomcatVersion=tomcatV7
