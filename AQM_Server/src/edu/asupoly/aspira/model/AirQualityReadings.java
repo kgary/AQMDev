@@ -123,7 +123,7 @@ public class AirQualityReadings implements java.io.Serializable {
     		next = iter.next();
     		jDeviceid.add(i, next.getDeviceId());
     		jPatientid.add(i, next.getPatientId());
-    		jDate.add(i, next.getDateTime());
+    		jDate.add(i, next.getDateTime().toString());
     		jSmall.add(i, next.getSmallParticleCount());
     		jLarge.add(i, next.getLargeParticleCount());
     		i++;

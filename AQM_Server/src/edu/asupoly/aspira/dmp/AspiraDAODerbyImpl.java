@@ -7,10 +7,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Properties;
 
 import org.json.simple.JSONArray;
@@ -270,20 +272,21 @@ public class AspiraDAODerbyImpl extends AspiraDAOBaseImpl {
                 ps.setString(2, (String)jPatientid.get(i));
 
                 Date d;
-                d = (Date)jDate.get(i);
+                String date = (String)jDate.get(i);
                 
+                //d = (Date)jDate.get(i);
+                d = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.US).parse(date);
                 ps.setTimestamp(3,new java.sql.Timestamp(d.getTime()), AspiraSettings.ASPIRA_CALENDAR);
-                
-                
-                ps.setInt(4, (Integer) jSmall.get(i));
-                ps.setInt(5, (Integer) jLarge.get(i));
+
+                //ps.setInt(4, (Integer) jSmall.get(i));
+                ps.setInt(4,  Integer.parseInt(jSmall.get(i).toString()));
+                ps.setInt(5, Integer.parseInt(jLarge.get(i).toString()));
                 
                 ps.setInt(6, id);
                 ps.executeUpdate();
                 ps.clearParameters();
             }
-            
-
+           
             c.commit();
         } catch (SQLException se) {
         	se.printStackTrace();
@@ -556,7 +559,7 @@ public class AspiraDAODerbyImpl extends AspiraDAOBaseImpl {
         		
         		jo.put("deviceid", rs.getString("deviceid"));
         		jo.put("patientid", rs.getString("patientid"));
-        		jo.put("readingtime", d);
+        		jo.put("readingtime", d.toString());
         		jo.put("smallparticle", rs.getInt("smallparticle"));
         		jo.put("largeparticle", rs.getInt("largeparticle"));
             	

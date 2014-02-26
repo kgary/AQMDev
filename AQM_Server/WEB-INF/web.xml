@@ -13,7 +13,7 @@
     
     <servlet-mapping>
         <servlet-name>AspiraPush</servlet-name>
-        <url-pattern>/*</url-pattern>
+        <url-pattern>/AspiraImportServlet</url-pattern>
     </servlet-mapping>    
 
     

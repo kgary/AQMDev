@@ -2,6 +2,7 @@ package edu.asupoly.aspira.monitorservice;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.net.HttpURLConnection;
@@ -54,7 +55,7 @@ public class ServerPushTask extends AspiraTimerTask {
     /**
      * verifies URL form
      */
-    private String __setURL(String url) {
+/*     private String __setURL(String url) {
         // figure the shortest possible valid URL is http://X.YYY
         String pushURL = null;
         if (url != null && url.trim().length() > 12) {
@@ -64,7 +65,7 @@ public class ServerPushTask extends AspiraTimerTask {
             }
         }
         return pushURL;
-    }
+    } */
     
 	@Override
 	public boolean init(Properties p) {
@@ -72,7 +73,9 @@ public class ServerPushTask extends AspiraTimerTask {
         
         __props = new Properties();  // need this even if not using here
         String patientId = AspiraSettings.getPatientId();
-        __pushURL = __setURL(p.getProperty("push.url"));
+        //__pushURL = __setURL(p.getProperty("push.url"));
+		__pushURL = p.getProperty("push.url");
+		
         if (patientId != null && __pushURL != null || __pushURL.length() >= 12) { // must be at least http://x.yyy
             __props.setProperty("patientid", patientId);
         } else {
@@ -158,23 +161,29 @@ public class ServerPushTask extends AspiraTimerTask {
 	
 	private int __pushToServerJson(JSONObject jobjects, String type) throws Exception {
         HttpURLConnection urlConn = null;
-        ObjectOutputStream oos = null;
+        DataOutputStream output = null;
         BufferedReader br = null;
+		
+		String url = __pushURL+"?type="+type;
+		//String url = "http://localhost:8081/AQMServer/AspiraImportServlet?type=jairqualityreadings";// for TCP/TP Monitor test
+		
         int rval = 0;
         try {
-            System.out.println("Pushing (json) to server" + __pushURL+type);
-            urlConn = (HttpURLConnection) new URL(__pushURL+type).openConnection();
+            System.out.println("Pushing (json) to server" + url);
+            urlConn = (HttpURLConnection) new URL(url).openConnection();
             urlConn.setDoInput(true);
             urlConn.setDoOutput(true);
             urlConn.setUseCaches(false);
             urlConn.setRequestMethod("POST");
+			urlConn.setRequestProperty("Content-Type", "application/json;charset=utf-8");//tell the server to expect a JSON Object
             urlConn.connect();
-            oos = new ObjectOutputStream(urlConn.getOutputStream());
+			
+            output = new DataOutputStream(urlConn.getOutputStream());
             
-            oos.writeObject(jobjects);
-            oos.flush();
-            oos.close();
-            System.out.println("Push complete " + __pushURL+type);
+            output.writeBytes(jobjects.toString());
+            output.flush();
+            output.close();
+            System.out.println("Push complete " + url);
             
             // Process the response
             if (urlConn.getResponseCode() != 200) {
@@ -192,7 +201,7 @@ public class ServerPushTask extends AspiraTimerTask {
                 }
             }
         } catch (MalformedURLException mue) {
-            System.out.println("Malformed URL " + __pushURL+type);
+            System.out.println("Malformed URL " + url);
             mue.printStackTrace();
             rval = PUSH_MALFORMED_URL;
         } catch (Throwable t) {
@@ -202,7 +211,7 @@ public class ServerPushTask extends AspiraTimerTask {
         } finally {
             try {
                 if (br != null) br.close();
-                if (oos != null) oos.close();
+                if (output != null) output.close();
             } catch (Throwable t2) {
             	t2.printStackTrace();
                 System.out.println("Unable to close Object Output Stream");
