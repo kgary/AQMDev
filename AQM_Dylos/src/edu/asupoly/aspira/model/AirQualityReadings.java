@@ -3,6 +3,9 @@ package edu.asupoly.aspira.model;
 import java.util.Iterator;
 import java.util.TreeSet;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 /*
  * AirQualityReadings represents the air quality readings
  * taken by a given device for a given Patient.
@@ -102,5 +105,49 @@ public class AirQualityReadings implements java.io.Serializable {
         return true;
     }
     
+    public JSONObject toJson(){
+    	//__readings
+    	JSONObject obj = new JSONObject();
+    	System.out.println("convert Serialized to JSON, contain: " + __readings.size() + " airqualityreadings");
+    	
+    	JSONArray jDeviceid = new JSONArray();
+    	JSONArray jPatientid = new JSONArray();
+    	JSONArray jDate = new JSONArray();
+    	JSONArray jSmall = new JSONArray();
+    	JSONArray jLarge = new JSONArray();
+    	JSONArray jGeoLatitude = new JSONArray();
+    	JSONArray jGeoLongitude = new JSONArray();
+    	JSONArray jGeoMethod = new JSONArray();
+    	
+    	ParticleReading next = null;
+    	
+    	Iterator<ParticleReading> iter = __readings.iterator();
+    	int i = 0;
+    	while(iter.hasNext()){
+    		next = iter.next();
+    		jDeviceid.add(i, next.getDeviceId());
+    		jPatientid.add(i, next.getPatientId());
+    		jDate.add(i, next.getDateTime().toString());
+    		jSmall.add(i, next.getSmallParticleCount());
+    		jLarge.add(i, next.getLargeParticleCount());
+    		jGeoLatitude.add(i, next.getGeoLatitude());
+    		jGeoLongitude.add(i, next.getGeoLongitude());
+    		jGeoMethod.add(i, next.getGeoMethod());
+    		i++;
+    	}
+    	obj.put("deviceid", jDeviceid);
+    	obj.put("patientid", jPatientid);
+    	obj.put("readingtime", jDate);
+    	obj.put("smallparticle", jSmall);
+    	obj.put("largeparticle", jLarge);
+    	obj.put("geolatitude", jGeoLatitude);
+    	obj.put("geolongitude", jGeoLongitude);
+    	obj.put("geomethod", jGeoMethod);
+    	
+    	System.out.println(obj.toString());
+    	
+		return obj;
+    	
+    }
     
 }

@@ -27,18 +27,18 @@ public final class AspiraSettings {
 			if(ASPIRA_HOME == null) {
 				ASPIRA_HOME = __globalProperties.getProperty("aspira.home");
 				if (ASPIRA_HOME == null || ASPIRA_HOME.isEmpty()) {
-					ASPIRA_HOME = "D:/projects/AirQualitySensing/";
+					ASPIRA_HOME = "D:/projects/AQM_server/";
 				}
 			}
 			if (!ASPIRA_HOME.endsWith(File.separator)) {
 				ASPIRA_HOME = ASPIRA_HOME + File.separator;
 			}
 			// We have a value for ASPIRA_HOME but is it valid and can I write to it?
-//			File f = new File(ASPIRA_HOME);
-//			if (!f.canWrite()) {
-//				 System.out.println("No write access to ASPIRA_HOME: " + ASPIRA_HOME);
-//				 throw new Exception("No write access to ASPIRA_HOME: " + ASPIRA_HOME);
-//			}
+			File f = new File(ASPIRA_HOME);
+			if (!f.canWrite()) {
+				 System.out.println("No write access to ASPIRA_HOME: " + ASPIRA_HOME);
+				 throw new Exception("No write access to ASPIRA_HOME: " + ASPIRA_HOME);
+			}
 			//Tell the User
 			System.out.println("Aspira system starting with values:");
 			System.out.println("\tASPIRA_HOME =\t" + ASPIRA_HOME);		
@@ -80,5 +80,25 @@ public final class AspiraSettings {
 
 	public static String getPatientId() {
 		return getAspiraProperty("patient.id");
+	}
+	
+    public static String getAspiraHome() {
+        return AspiraSettings.getAspiraSettings().getHome();
+    }
+
+	private String getHome() {
+        return ASPIRA_HOME;
+	}
+	
+	public static String getGeoLatitude() {
+		return getAspiraProperty("geocoordinates.latitude");
+	}	
+	
+	public static String getGeoLongitude() {
+		return getAspiraProperty("geocoordinates.longitude");
+	}
+	
+	public static String getGeoMethod() {
+		return getAspiraProperty("geocoordinates.method");
 	}
 }

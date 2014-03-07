@@ -14,6 +14,9 @@ public class ParticleReading implements java.io.Serializable, Comparable<Particl
 
     private String deviceId;
     private String patientId;
+    private String geoLatitude;
+    private String geoLongitude;
+    private String geoMethod;
     
     public ParticleReading(String deviceId, String patientId, Date d, int s, int l) {
 		this(deviceId, patientId, d, s, l, DEFAULT_NO_GROUP_ASSIGNED);
@@ -26,6 +29,21 @@ public class ParticleReading implements java.io.Serializable, Comparable<Particl
         smallParticleCount = s;
         largeParticleCount = l;
     }
+    
+    public ParticleReading(String deviceId, String patientId, Date d, int s, int l, String geoLatitude, String geoLongitude, String geoMethod) {
+    	this(deviceId, patientId, d, s, l, geoLatitude, geoLongitude, geoMethod, DEFAULT_NO_GROUP_ASSIGNED);
+    }
+    
+    public ParticleReading(String deviceId, String patientId, Date d, int s, int l, String geoLatitude, String geoLongitude, String geoMethod, int groupid)  {
+        this.deviceId  = deviceId;
+        this.patientId = patientId;
+        this.geoLatitude = geoLatitude;
+        this.geoLongitude = geoLongitude;
+        this.geoMethod = geoMethod;
+        dateTime = d;
+        smallParticleCount = s;
+        largeParticleCount = l;
+    }    
 
 
 	@Override
@@ -69,11 +87,17 @@ public class ParticleReading implements java.io.Serializable, Comparable<Particl
         return dateTime;
 	}
 	
+	public String getGeoLatitude() {
+        return geoLatitude;
+	}
 	
+	public String getGeoLongitude() {
+        return geoLongitude;
+	}
 	
-	
-	
-	
+	public String getGeoMethod() {
+        return geoMethod;
+	}
 	
 	
 	

@@ -114,6 +114,7 @@ public final class MonitoringService {
         __timer.cancel();
         // If the singleton accessor is called again it will fire up another Timer
         MonitoringService.__theMonitoringService = null;
+        
         System.out.println("Shutting down MonitorService");
 	}
 
@@ -146,5 +147,6 @@ public final class MonitoringService {
         }
         return rval;
 	}
+	
 
 }

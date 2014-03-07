@@ -4,6 +4,8 @@ import java.io.InputStreamReader;
 import java.util.Date;
 import java.util.Properties;
 
+import org.json.simple.JSONObject;
+
 import edu.asupoly.aspira.model.AirQualityReadings;
 import edu.asupoly.aspira.model.ServerPushEvent;
 
@@ -73,6 +75,16 @@ public final class AspiraDAO implements IAspiraDAO{
 		return __dao.getLastServerPush();
 	}
 
+	@Override
+	public JSONObject getLastServerPushJson(int type) throws Exception {
+		return __dao.getLastServerPushJson(type);
+	}
+
+
+	@Override
+	public JSONObject getLastServerPushJson() throws Exception {
+		return __dao.getLastServerPushJson();
+	}
 
 	@Override
 	public AirQualityReadings findAirQualityReadingsForPatient(
@@ -92,6 +104,27 @@ public final class AspiraDAO implements IAspiraDAO{
 			throws Exception {
 		return __dao.findAirQualityReadingsForPatient(patientId);
 	}
+
+
+	@Override
+	public boolean importAirQualityReadingsJson(JSONObject toImport, boolean overwrite) throws Exception {
+		return __dao.importAirQualityReadingsJson(toImport, overwrite);
+	}
+
+
+	@Override
+	public JSONObject findAirQualityReadingsForPatientTailJson(String patientId, int tail) throws Exception {
+		return __dao.findAirQualityReadingsForPatientTailJson(patientId, tail);
+	}
+
+
+	@Override
+	public JSONObject findAirQualityReadingsForPatientJson(String patientId) throws Exception {
+		return __dao.findAirQualityReadingsForPatientJson(patientId);
+	}
+
+
+
 	
 	
 	

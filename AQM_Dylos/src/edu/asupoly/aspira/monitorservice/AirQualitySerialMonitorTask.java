@@ -30,6 +30,9 @@ public class AirQualitySerialMonitorTask extends AspiraTimerTask{
     private AirQualityReadings __aqReadings = new AirQualityReadings();
     private String        __deviceId;
     private String        __patientId;
+    private String 		  __geoLatitude;
+    private String		  __geoLongitude;
+    private String		  __geoMethod;
     
     public AirQualitySerialMonitorTask() {
         super();
@@ -43,12 +46,20 @@ public class AirQualitySerialMonitorTask extends AspiraTimerTask{
         String deviceId     = AspiraSettings.getAirQualityMonitorId();
         String patientId    = AspiraSettings.getPatientId();
         String serialPort   = p.getProperty("aqmSerialPort");
-        if (deviceId != null && patientId != null && serialPort != null) {
+        String geoLatitude = AspiraSettings.getGeoLatitude();
+        String geoLongitude = AspiraSettings.getGeoLongitude();
+        String geoMethod = AspiraSettings.getGeoMethod();
+        
+        if (deviceId != null && patientId != null && serialPort != null && geoLatitude != null && geoLongitude != null) {
             __deviceId  = deviceId;
             __patientId = patientId;
+            __geoLatitude = geoLatitude;
+            __geoLongitude = geoLongitude;
+            __geoMethod = geoMethod;
             __props.setProperty("deviceid", deviceId);
             __props.setProperty("patientid", patientId);
             __props.setProperty("aqmSerialPort", serialPort);
+            
             
             try {
             	// this section initializes the serialPort
@@ -165,7 +176,7 @@ public class AirQualitySerialMonitorTask extends AspiraTimerTask{
                                     st2 = new StringTokenizer(st.nextToken(), ",");
                                     if (st2.countTokens() == 2) { // should always be the case
                                         ParticleReading pr = new ParticleReading(__deviceId, __patientId, new Date(), 
-                                                Integer.parseInt(st2.nextToken()), Integer.parseInt(st2.nextToken()));
+                                                Integer.parseInt(st2.nextToken()), Integer.parseInt(st2.nextToken()), __geoLatitude, __geoLongitude, __geoMethod);
                                         __aqReadings.addReading(pr);
                                         System.out.println("Importing ParticleReading " + pr);
                                     } else {
