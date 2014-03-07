@@ -14,9 +14,7 @@
 
   <!-- Compiles your java files and puts the classes in classes.dir -->
   <target name="compile" depends="init">
-    <javac
-      srcdir="${src.dir}"
-      destdir="${classes.dir}">
+    <javac srcdir="${src.dir}" destdir="${classes.dir}" compiler="javac1.6" includeantruntime="false">
       <!-- Make sure you set your classpath! -->
       <classpath>
         <fileset dir="${tomcat.home}/lib" includes="servlet-api.jar"/>
