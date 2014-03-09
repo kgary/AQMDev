@@ -23,6 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
@@ -41,6 +42,7 @@ public class DataSync extends AsyncTask<Void, Void, Void> {
 	NotificationCompat.Builder notifyLowBattery;
 	NotificationCompat.Builder notiftyAirQualityModerate;
 	NotificationCompat.Builder notiftyAirQualityBad;
+	GeoLocation geoLocation;
 
 	
 
@@ -71,6 +73,9 @@ public class DataSync extends AsyncTask<Void, Void, Void> {
 	DBTemperature tempData;
 	DBHumidity humidityData;
 	DBPressure presureData;
+	String co2DevID;
+	GeoLocation geoData;
+	double locLat, locLong;
 
 	DBDataHandler dbHandler;
 
@@ -252,11 +257,18 @@ public class DataSync extends AsyncTask<Void, Void, Void> {
 					co2Data = new DBCO2();
 					long value = Long.parseLong(result);
 					co2Data.setValue(value);
-
+					
+					
 					DBDataHandler myDBHandler = new DBDataHandler(context);
 					myDBHandler.open();
 					long id = myDBHandler.addData(dateTime, coData, co2Data, tempData, humidityData, presureData);
 					// Added Nguyen section
+					geoData = new GeoLocation(context);
+					if (geoData.canGetLocation()) {
+						locLat = geoData.getLatitude();
+						locLong = geoData.getLongitude();
+					}
+					co2DevID = "UNKNOWN";
 					JSONArray json_data = new JSONArray();
 					 	
 						json_data.put(sdMC + id);
@@ -271,12 +283,17 @@ public class DataSync extends AsyncTask<Void, Void, Void> {
 					
 					try {
 						json_obj.put("id", "SensorDrone" + sdMC);
+						json_obj.put("geolatitude", Double.toString(locLat));
+						json_obj.put("geolongitude", Double.toString(locLong));
+						json_obj.put("geomethod", geoData.getGeoMethod());
 						json_obj.put("dateTime", dateTime);
 						json_obj.put("coData", coData);
 						json_obj.put("co2Data", co2Data);
 						json_obj.put("tempData", tempData);
 						json_obj.put("humidityData", humidityData);
 						json_obj.put("presureData", presureData);
+						json_obj.put("co2DeviceID", co2DevID);
+						
 					} catch (JSONException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -295,10 +312,10 @@ public class DataSync extends AsyncTask<Void, Void, Void> {
 					
 
 					HttpClient httpClient = new DefaultHttpClient();
-					/* TODO blockout for url testing
+					// TODO blockout for url testing
 					try {
-					    HttpPost request = new HttpPost("http://Databaseserver_URL");
-					    StringEntity params = new StringEntity(json_data.toString());
+					    HttpPost request = new HttpPost("http://lead2.poly.asu.edu:8090/AQMEcho/aqmecho");
+					    StringEntity params = new StringEntity(json_obj.toString());
 					    request.addHeader("content-type", "application/x-www-form-urlencoded");
 					    request.setEntity(params);
 					    httpClient.execute(request);
@@ -309,10 +326,10 @@ public class DataSync extends AsyncTask<Void, Void, Void> {
 					}finally {
 						httpClient.getConnectionManager().shutdown();
 					}
-					*/
+					
 					
 					// Nguyen section ended
-					
+					/*
 					Log.d("NguyenDebug","VaLues loaded into database id: " + id);
 					Log.d("NguyenDebug","VaLues loaded into database dateTime: " + dateTime);
 					Log.d("NguyenDebug","VaLues loaded into database coData: " + coData);
@@ -320,7 +337,7 @@ public class DataSync extends AsyncTask<Void, Void, Void> {
 					Log.d("NguyenDebug","VaLues loaded into database tempData: " + tempData);
 					Log.d("NguyenDebug","VaLues loaded into database humidityData: " + humidityData);
 					Log.d("NguyenDebug","VaLues loaded into database presureData: " + presureData);
-					
+					*/
 					myDBHandler.close();
 
 					// Make a blob to get a quality assessment
