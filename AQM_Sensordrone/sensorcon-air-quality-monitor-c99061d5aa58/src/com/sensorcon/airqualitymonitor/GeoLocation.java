@@ -95,7 +95,7 @@ public class GeoLocation extends Service implements LocationListener {
                             }
                         }
                     }
-                }
+                } 
             }
  
         } catch (Exception e) {

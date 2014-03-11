@@ -1,5 +1,6 @@
 package com.sensorcon.airqualitymonitor;
 
+import android.app.Activity;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -7,6 +8,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.Builder;
 import android.util.Log;
@@ -35,15 +39,15 @@ public class DataSync extends AsyncTask<Void, Void, Void> {
 	Drone myDrone;
 	String sdMC = "";
 	AirQualityMonitor runningApp = null;
-
+	double locLat, locLong;
+	String locMethod;
+	
 	Context context;
 
 	NotificationManager notifier;
 	NotificationCompat.Builder notifyLowBattery;
 	NotificationCompat.Builder notiftyAirQualityModerate;
 	NotificationCompat.Builder notiftyAirQualityBad;
-	GeoLocation geoLocation;
-
 	
 
 	boolean measurementTimeout;
@@ -66,6 +70,11 @@ public class DataSync extends AsyncTask<Void, Void, Void> {
 		this.context = context;
 		this.runningApp = currentApp;
 	}
+	public void setLocation (double locLat, double locLong, String locMethod){
+		this.locLat = locLat;
+		this.locLong = locLong;
+		this.locMethod = locMethod;
+	}
 
 	DBDateTime dateTime;
 	DBCO coData;
@@ -74,8 +83,6 @@ public class DataSync extends AsyncTask<Void, Void, Void> {
 	DBHumidity humidityData;
 	DBPressure presureData;
 	String co2DevID;
-	GeoLocation geoData;
-	double locLat, locLong;
 
 	DBDataHandler dbHandler;
 
@@ -263,11 +270,9 @@ public class DataSync extends AsyncTask<Void, Void, Void> {
 					myDBHandler.open();
 					long id = myDBHandler.addData(dateTime, coData, co2Data, tempData, humidityData, presureData);
 					// Added Nguyen section
-					geoData = new GeoLocation(context);
-					if (geoData.canGetLocation()) {
-						locLat = geoData.getLatitude();
-						locLong = geoData.getLongitude();
-					}
+					
+					
+						
 					co2DevID = "UNKNOWN";
 					JSONArray json_data = new JSONArray();
 					 	
@@ -285,7 +290,7 @@ public class DataSync extends AsyncTask<Void, Void, Void> {
 						json_obj.put("id", "SensorDrone" + sdMC);
 						json_obj.put("geolatitude", Double.toString(locLat));
 						json_obj.put("geolongitude", Double.toString(locLong));
-						json_obj.put("geomethod", geoData.getGeoMethod());
+						json_obj.put("geomethod", locMethod);
 						json_obj.put("dateTime", dateTime);
 						json_obj.put("coData", coData);
 						json_obj.put("co2Data", co2Data);
