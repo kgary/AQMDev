@@ -309,6 +309,7 @@ public class AirQualityMonitor extends Activity {
 				" " + dbData.get(lastItem).getDbDateTime().getTimeStamp());
 
 		assessQuality(dbData.get(lastItem).getStatus());
+		
 	}
 
 	public void assessQuality(int level) {
@@ -407,6 +408,12 @@ public class AirQualityMonitor extends Activity {
 			return;
 		}
 		faceSwitcher.setImageResource(R.drawable.face_unknown);
+		
+
+		DataSync getData = new DataSync(getApplicationContext(), AirQualityMonitor.this);
+		getData.setSdMC(MAC);
+		getData.setContext(myContext);
+		// Nguyen Added
 		GeoLocation geoData = new GeoLocation(getApplicationContext());
 		geoData.getLocation();
 
@@ -419,11 +426,8 @@ public class AirQualityMonitor extends Activity {
 			Log.d("NguyenDebug", "Activity Longitude is " + locLong);
 			Log.d("NguyenDebug", "Activity LocMethod is " + locMethod);
 		} else {Log.d("NguyenDebug", "geoData is DISABLED");}
-		
-		DataSync getData = new DataSync(getApplicationContext(), AirQualityMonitor.this);
-		getData.setSdMC(MAC);
-		getData.setContext(myContext);
 		getData.setLocation(locLat, locLong, locMethod);
+		// Nguyen
 		getData.execute();
 		
 	}

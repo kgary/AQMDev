@@ -20,6 +20,8 @@ public class DroneAlarm extends BroadcastReceiver {
 	AlarmManager myAlarmManager;
 	Intent myIntent;
 	PendingIntent myPendingIntent;
+	double locLat, locLong;
+	String locMethod;
 
 	public DroneAlarm() {
 
@@ -43,6 +45,21 @@ public class DroneAlarm extends BroadcastReceiver {
 
 
 		DataSync droneTask = new DataSync(context);
+		// Nguyen Added
+		GeoLocation geoData = new GeoLocation(context);
+		geoData.getLocation();
+
+		if (geoData.canGetLocation()) {
+			Log.d("NguyenDebug", "geoData is enabled");
+			locLat = geoData.getLatitude();
+			locLong = geoData.getLongitude();
+			locMethod = geoData.getGeoMethod();
+			Log.d("NguyenDebug", "Activity nLatitude is " + locLat);
+			Log.d("NguyenDebug", "Activity Longitude is " + locLong);
+			Log.d("NguyenDebug", "Activity LocMethod is " + locMethod);
+		} else {Log.d("NguyenDebug", "geoData is DISABLED");}
+		droneTask.setLocation(locLat, locLong, locMethod);
+		// Nguyen
 		droneTask.setSdMC(MAC);
 		droneTask.execute();
 
