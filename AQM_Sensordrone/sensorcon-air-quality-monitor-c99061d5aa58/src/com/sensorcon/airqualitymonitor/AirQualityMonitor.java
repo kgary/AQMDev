@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import com.sensorcon.airqualitymonitor.database.DBDataBlob;
 import com.sensorcon.airqualitymonitor.database.DBDataHandler;
+import com.sensorcon.airqualitymonitor.database.DBDateTime;
 
 
 
@@ -19,6 +20,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -76,6 +78,11 @@ public class AirQualityMonitor extends Activity {
 	
 	boolean faceAnimateToggle;
 	boolean isMeasuring;
+	
+	DBDateTime dateTime;
+	
+	double locLat, locLong;
+	String locMethod;
 	
 	public void setIsMeasuring(boolean status) {
 		this.isMeasuring = status;
@@ -302,6 +309,7 @@ public class AirQualityMonitor extends Activity {
 				" " + dbData.get(lastItem).getDbDateTime().getTimeStamp());
 
 		assessQuality(dbData.get(lastItem).getStatus());
+		
 	}
 
 	public void assessQuality(int level) {
@@ -400,10 +408,28 @@ public class AirQualityMonitor extends Activity {
 			return;
 		}
 		faceSwitcher.setImageResource(R.drawable.face_unknown);
+		
+
 		DataSync getData = new DataSync(getApplicationContext(), AirQualityMonitor.this);
 		getData.setSdMC(MAC);
 		getData.setContext(myContext);
+		// Nguyen Added
+		GeoLocation geoData = new GeoLocation(getApplicationContext());
+		geoData.getLocation();
+
+		if (geoData.canGetLocation()) {
+			Log.d("NguyenDebug", "geoData is enabled");
+			locLat = geoData.getLatitude();
+			locLong = geoData.getLongitude();
+			locMethod = geoData.getGeoMethod();
+			Log.d("NguyenDebug", "Activity nLatitude is " + locLat);
+			Log.d("NguyenDebug", "Activity Longitude is " + locLong);
+			Log.d("NguyenDebug", "Activity LocMethod is " + locMethod);
+		} else {Log.d("NguyenDebug", "geoData is DISABLED");}
+		getData.setLocation(locLat, locLong, locMethod);
+		// Nguyen
 		getData.execute();
+		
 	}
 	
 	@Override
