@@ -1,0 +1,74 @@
+<project name="AQM_Server" default="compile" basedir=".">
+    <property name="src" value="src" />
+    <property name="classes" value="classes" />
+	<property name="build" value="build"/>
+	<property name="lib" value="lib"/>
+	<property name="properties" value="properties"/>
+	<property name="sql" value="sql"/>
+	<property name="dist.jar" value="aqm_server.war"/>
+	<property name="tomcat.home" value="D:/Java/apache-tomcat-7.0.29"/>
+
+    <path id="compile.classpath">
+       <pathelement path="${classes}"/>  
+       <fileset dir="${lib}">
+          <include name="**/*.jar"/>
+       </fileset> 
+	   <fileset dir="${tomcat.home}/lib" includes="servlet-api.jar"/>
+    </path>	
+	
+	<target name="prepare">
+		<tstamp/>
+		<mkdir dir="${build}"/>
+		<mkdir dir="${build}/WEB-INF"/>
+	</target>	
+	
+	<target name="compile">
+		<mkdir dir="WEB-INF"/>
+		<mkdir dir="${classes}"/>
+		<javac source="1.6" target="1.6" srcdir="${src}" destdir="${classes}" includeantruntime="false">
+			<classpath refid="compile.classpath"/>
+		</javac>
+		<copy todir="WEB-INF/${classes}">
+			<fileset dir="${classes}"/>
+		</copy>		
+		<copy todir="WEB-INF/${classes}/${properties}">
+			<fileset dir="${properties}"/>
+		</copy>
+		<copy todir="WEB-INF/${lib}">
+			<fileset dir="${lib}"/>		
+		</copy> 		
+		<copy file="web.xml" tofile="WEB-INF/web.xml" overwrite="yes"/>
+	</target>	
+	
+	<target name="build" depends="compile,prepare">
+		<copy todir="${build}/WEB-INF/${classes}">
+			<fileset dir="${classes}"/>
+		</copy>
+		<copy todir="${build}/WEB-INF/${classes}/${properties}">
+		    <fileset dir="${properties}">
+		    		<include name="**.properties"/>	
+		    </fileset>
+		</copy>
+		<copy todir="${build}/WEB-INF/${lib}">
+			<fileset dir="${lib}"/>		
+		</copy> 
+		<copy todir="${build}/${sql}">
+			<fileset dir="${sql}">
+				<include name="**.sql"/>
+			</fileset>
+		</copy> 
+		<copy file="web.xml" tofile="${build}/WEB-INF/web.xml" overwrite="yes"/>
+		<copy file="index.html" tofile="${build}/index.html" overwrite="yes"/>	
+	</target>
+	
+	<target name="dist" depends="build">
+    		<jar destfile="${dist.jar}" basedir="${build}"/>    
+  	</target>	
+	
+	<target name="clean">
+		<delete dir="${build}" />
+		<delete dir="${classes}"/>
+		<delete file="${dist.jar}" />
+		<delete dir="WEB-INF" />
+	</target>	
+</project>
