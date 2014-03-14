@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
-<title>AQM Post Test</title>
+<title>AQM Echo Post</title>
 <script>
 function ajaxPost(url, elem) {
  var docelem=document.getElementById(elem);
@@ -16,6 +16,8 @@ function ajaxPost(url, elem) {
 
  //Send the proper header information along with the request
  xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+ xmlhttp.setRequestHeader("Content-length", docstr.length);
+ xmlhttp.setRequestHeader("Connection", "close");
 
  xmlhttp.onreadystatechange = function() {
      //Call a function when the state changes.
@@ -33,20 +35,10 @@ function ajaxPost(url, elem) {
 }</script>
 </head>
 <body>
-    <textarea rows="15" cols="150">
-sensordrone sample:
-{"deviceId":"SensorDrone00:00:00:00:00:00","co2deviceId":"unknown","dateTime":"20140313_072855","coData":1,"co2Data":-1,"presureData":1,"tempData":1,"humidityData":1,"geoLatitude":33.309986,"geoLongitude":-111.672504,"geoMethod":"Network"}
-    
-dylos sample:
-[{"deviceId":"aqm0","userId":"user0","dateTime":"Thu Mar 13 07:28:55 MST 2014","smallParticle":0,"largeParticle":0,"geoLatitude":0.0,"geoLongitude":0.0,"geoMethod":"manual"}]
-
-[{"deviceId":"aqm0","userId":"user0","dateTime":"Thu Mar 13 07:29:55 MST 2014","smallParticle":8,"largeParticle":3,"geoLatitude":0.0,"geoLongitude":0.0,"geoMethod":"manual"},{"deviceId":"aqm0","userId":"user0","dateTime":"Thu Mar 13 07:30:55 MST 2014","smallParticle":10,"largeParticle":2,"geoLatitude":33.309986,"geoLongitude":-111.672504,"geoMethod":"manual"}]
-    </textarea>
     <textarea id="__str" rows="5" cols="80">
-Copy your string content here
+    Copy your string content here
     </textarea>
-    <input type="button" value="submit dylos" onclick="ajaxPost('/AQM/AQMTest?type=dylos', '__str')"/>
-    <input type="button" value="submit sensordrone" onclick="ajaxPost('/AQM/AQMTest?type=sensordrone', '__str')"/>
+    <input value="submit" onclick="ajaxPost('/AQMEcho/aqmecho', '__str')"/>
     <div id="ServerResponse"></div>
 </body>
 </html>

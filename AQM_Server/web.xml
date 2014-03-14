@@ -1,23 +1,31 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-
 <web-app xmlns="http://java.sun.com/xml/ns/j2ee"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
          version="2.4">
-         
-    <display-name>AQM Echo Web Application</display-name>
-	
-    <servlet>
-        <servlet-name>AQMEchoPostString</servlet-name>
-        <servlet-class>edu.asupoly.heal.aqm.server.EchoPostStringServlet</servlet-class>
-    </servlet>
 
-   <servlet-mapping>
-        <servlet-name>AQMEchoPostString</servlet-name>
-        <url-pattern>/aqmecho</url-pattern>
-    </servlet-mapping>
+	<display-name>AQM web app</display-name>
+
+	<servlet>
+		<servlet-name>AQMServerTest</servlet-name>
+		<servlet-class>edu.asupoly.heal.aqm.test.AQMServletTest</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>AQMImportServlet</servlet-name>
+		<servlet-class>edu.asupoly.heal.aqm.server.AQMImportServlet</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>AQMServerTest</servlet-name>
+		<url-pattern>/AQMTest</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>AQMImportServlet</servlet-name>
+		<url-pattern>/AQMImport</url-pattern>
+	</servlet-mapping>
+
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+	</welcome-file-list>
     
-    <welcome-file-list>
-        <welcome-file>index.html</welcome-file>
-    </welcome-file-list>
 </web-app>

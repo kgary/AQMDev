@@ -4,17 +4,28 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
          version="2.4">
 
-    <display-name>Aspira web app</display-name>
+	<display-name>AQM web app</display-name>
 
-    <servlet>
-        <servlet-name>AspiraPush</servlet-name>
-        <servlet-class>edu.asupoly.aspira.server.AspiraImportServlet</servlet-class>
-    </servlet>
-    
-    <servlet-mapping>
-        <servlet-name>AspiraPush</servlet-name>
-        <url-pattern>/AspiraImportServlet</url-pattern>
-    </servlet-mapping>    
+	<servlet>
+		<servlet-name>AQMServerTest</servlet-name>
+		<servlet-class>edu.asupoly.heal.aqm.test.AQMServletTest</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>AQMImportServlet</servlet-name>
+		<servlet-class>edu.asupoly.heal.aqm.server.AQMImportServlet</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>AQMServerTest</servlet-name>
+		<url-pattern>/AQMTest</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>AQMImportServlet</servlet-name>
+		<url-pattern>/AQMImport</url-pattern>
+	</servlet-mapping>
 
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+	</welcome-file-list>
     
 </web-app>

@@ -1,72 +1,74 @@
-<!--
-   Copyright 2014 Kevin A. Gary
--->
+<project name="AQM_Server" default="compile" basedir=".">
+    <property name="src" value="src" />
+    <property name="classes" value="classes" />
+	<property name="build" value="build"/>
+	<property name="lib" value="lib"/>
+	<property name="properties" value="properties"/>
+	<property name="sql" value="sql"/>
+	<property name="dist.jar" value="aqm_server.war"/>
+	<property name="tomcat.home" value="D:/Java/apache-tomcat-7.0.29"/>
 
-<project name="AQM Echo Post String" default="compile" basedir=".">
-  <property file="build.properties"/>
-
-  <!-- init target makes the directory structure. You may not
-       require this if you set your environment up by hand. -->
-  <target name="init">
-    <tstamp/>
-    <mkdir dir="${classes.dir}"/>
-  </target>
-
-  <!-- Compiles your java files and puts the classes in classes.dir -->
-  <target name="compile" depends="init">
-    <javac srcdir="${src.dir}" destdir="${classes.dir}" compiler="javac1.6" includeantruntime="false">
-      <!-- Make sure you set your classpath! -->
-      <classpath>
-        <fileset dir="${tomcat.home}/lib" includes="servlet-api.jar"/>
-      	<fileset dir="${lib.dir}" includes="*.jar"/>
-        <pathelement path="${classes.dir}" />
-      </classpath>
-    </javac>
-  </target>
-
-  <!-- The deploy target will be highly dependent on your deployed app.
-       For example, if you are building a web-app, you should include
-       commands to copy files over to your deploy directory according
-       to the servlet specification, or create a .war file (via dist)
-       and copy it over. If you are creating a standalone app (like this
-       example does), you can create it in a given directory, or create
-       your dist jar first that can be run using java -jar. -->
-  <target name="deploy" depends="dist">
-    <copy file="${dist.jar}" todir="${tomcat.home}/webapps" overwrite="yes"/>
-  </target>
-      
-  <target name="build" depends="compile">
-    <mkdir dir="${build.home}"/>
-    <mkdir dir="${build.home}/WEB-INF"/>
-    <copy todir="${build.home}/WEB-INF">
-      <fileset dir="." includes="${classes.dir}/**,${lib.dir}/**"/>
-    </copy>
-  	<!--
-    <copy todir="${build.home}/WEB-INF/${classes.dir}">
-      <fileset dir="${properties.dir}"/>
-    </copy>
-    <copy todir="${build.home}">
-      <fileset dir="${resources.dir}" includes="*.html, *.jsp"/>
-    </copy>
-    -->
-    <copy file="web.xml" tofile="${build.home}/WEB-INF/web.xml" overwrite="yes"/>
-  	<copy file="index.html" tofile="${build.home}/index.html" overwrite="yes"/>
-  </target>
-    
-  <!-- This example dist target merely jars up the webapp files. -->
-  <target name="dist" depends="build">
-    <jar destfile="${dist.jar}" basedir="${build.home}">
-    </jar>
-  </target>
-
-  <!-- Clean -->
-  <!-- NOTE: This needs some work, we really need to undeploy the app in TC -->
-  <target name="clean">
-    <delete file="${dist.jar}"/>
-    <delete dir="${tomcat.home}/webapps/${app.name}"/>
-    <delete file="${tomcat.home}/webapps/${dist.jar}"/>
-    <delete dir="${build.home}"/>
-	<delete dir="${classes.dir}"/>
-  </target>
-
+    <path id="compile.classpath">
+       <pathelement path="${classes}"/>  
+       <fileset dir="${lib}">
+          <include name="**/*.jar"/>
+       </fileset> 
+	   <fileset dir="${tomcat.home}/lib" includes="servlet-api.jar"/>
+    </path>	
+	
+	<target name="prepare">
+		<tstamp/>
+		<mkdir dir="${build}"/>
+		<mkdir dir="${build}/WEB-INF"/>
+	</target>	
+	
+	<target name="compile">
+		<mkdir dir="WEB-INF"/>
+		<mkdir dir="${classes}"/>
+		<javac source="1.6" target="1.6" srcdir="${src}" destdir="${classes}" includeantruntime="false">
+			<classpath refid="compile.classpath"/>
+		</javac>
+		<copy todir="WEB-INF/${classes}">
+			<fileset dir="${classes}"/>
+		</copy>		
+		<copy todir="WEB-INF/${classes}/${properties}">
+			<fileset dir="${properties}"/>
+		</copy>
+		<copy todir="WEB-INF/${lib}">
+			<fileset dir="${lib}"/>		
+		</copy> 		
+		<copy file="web.xml" tofile="WEB-INF/web.xml" overwrite="yes"/>
+	</target>	
+	
+	<target name="build" depends="compile,prepare">
+		<copy todir="${build}/WEB-INF/${classes}">
+			<fileset dir="${classes}"/>
+		</copy>
+		<copy todir="${build}/WEB-INF/${classes}/${properties}">
+		    <fileset dir="${properties}">
+		    		<include name="**.properties"/>	
+		    </fileset>
+		</copy>
+		<copy todir="${build}/WEB-INF/${lib}">
+			<fileset dir="${lib}"/>		
+		</copy> 
+		<copy todir="${build}/${sql}">
+			<fileset dir="${sql}">
+				<include name="**.sql"/>
+			</fileset>
+		</copy> 
+		<copy file="web.xml" tofile="${build}/WEB-INF/web.xml" overwrite="yes"/>
+		<copy file="index.html" tofile="${build}/index.html" overwrite="yes"/>	
+	</target>
+	
+	<target name="dist" depends="build">
+    		<jar destfile="${dist.jar}" basedir="${build}"/>    
+  	</target>	
+	
+	<target name="clean">
+		<delete dir="${build}" />
+		<delete dir="${classes}"/>
+		<delete file="${dist.jar}" />
+		<delete dir="WEB-INF" />
+	</target>	
 </project>
