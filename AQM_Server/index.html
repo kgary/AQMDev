@@ -35,18 +35,17 @@ function ajaxPost(url, elem) {
 <body>
     <textarea rows="15" cols="150">
 sensordrone sample:
-{"deviceId":"SensorDrone00:00:00:00:00:00","co2deviceId":"unknown","dateTime":"20140313_072855","coData":1,"co2Data":-1,"presureData":1,"tempData":1,"humidityData":1,"geoLatitude":33.309986,"geoLongitude":-111.672504,"geoMethod":"Network"}
+{"coData":-2,"dateTime":"20140321_124956","geoLongitude":-111.6823322,"co2Data":-1,"co2DeviceID":"UNKNOWN","geoMethod":"Network","type":"sensordrone","presureData":96464,"tempData":25,"geoLatitude":33.2993061,"deviceId":"SensorDroneB8:FF:FE:B9:C3:FA","humidityData":32}
     
 dylos sample:
-[{"deviceId":"aqm0","userId":"user0","dateTime":"Thu Mar 13 07:28:55 MST 2014","smallParticle":0,"largeParticle":0,"geoLatitude":0.0,"geoLongitude":0.0,"geoMethod":"manual"}]
+[{"type":"dylos","deviceId":"aqm1","userId":"user1","dateTime":"Fri Mar 21 13:27:09 MST 2014","smallParticle":93,"largeParticle":26,"geoLatitude":33.3099177,"geoLongitude":-111.6726974,"geoMethod":"manual"}]
 
-[{"deviceId":"aqm0","userId":"user0","dateTime":"Thu Mar 13 07:29:55 MST 2014","smallParticle":8,"largeParticle":3,"geoLatitude":0.0,"geoLongitude":0.0,"geoMethod":"manual"},{"deviceId":"aqm0","userId":"user0","dateTime":"Thu Mar 13 07:30:55 MST 2014","smallParticle":10,"largeParticle":2,"geoLatitude":33.309986,"geoLongitude":-111.672504,"geoMethod":"manual"}]
+[{"type":"dylos","deviceId":"aqm1","userId":"user1","dateTime":"Fri Mar 21 13:26:39 MST 2014","smallParticle":93,"largeParticle":26,"geoLatitude":33.3099177,"geoLongitude":-111.6726974,"geoMethod":"manual"},{"type":"dylos","deviceId":"aqm1","userId":"user1","dateTime":"Fri Mar 21 13:27:59 MST 2014","smallParticle":93,"largeParticle":26,"geoLatitude":33.3099177,"geoLongitude":-111.6726974,"geoMethod":"manual"}]
     </textarea>
     <textarea id="__str" rows="5" cols="80">
 Copy your string content here
     </textarea>
-    <input type="button" value="submit dylos" onclick="ajaxPost('/AQM/AQMTest?type=dylos', '__str')"/>
-    <input type="button" value="submit sensordrone" onclick="ajaxPost('/AQM/AQMTest?type=sensordrone', '__str')"/>
+    <input type="button" value="submit" onclick="ajaxPost('/AQM/AQMTest', '__str')"/>
     <div id="ServerResponse"></div>
 </body>
 </html>

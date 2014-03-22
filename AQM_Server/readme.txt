@@ -1,9 +1,30 @@
-test data sample:
-sensordrone test data:
-{"deviceId":"SensorDrone00:00:00:00:00:00","co2deviceId":"unknown","dateTime":"20140313_072855","coData":1,"co2Data":1,"presureData":1,"tempData":1,"humidityData":1,"geoLatitude":33.309986,"geoLongitude":-111.672504,"geoMethod":"Network"}
+Database:
+TABLE1: aqmdata_common
+COLUMN_NAME         |TYPE_NAME|DEC&|NUM&|COLUM&|COLUMN_DEF|CHAR_OCTE&|IS_NULL&
+------------------------------------------------------------------------------
+DEVICEID            |VARCHAR  |NULL|NULL|64    |NULL      |128       |NO
+DATETIME            |TIMESTAMP|9   |10  |29    |NULL      |NULL      |NO
+LATITUDE            |REAL     |NULL|2   |23    |NULL      |NULL      |YES
+LONGITUDE           |REAL     |NULL|2   |23    |NULL      |NULL      |YES
+METHOD              |VARCHAR  |NULL|NULL|16    |NULL      |32        |YES
 
-dylos test data:
-[{"deviceId":"aqm0","userId":"user0","dateTime":"Thu Mar 13 07:28:55 MST 2014","smallParticle":0,"largeParticle":0,"geoLatitude":0.0,"geoLongitude":0.0,"geoMethod":"manual"}]
+TABLE2: aqmdata_dylos
+COLUMN_NAME         |TYPE_NAME|DEC&|NUM&|COLUM&|COLUMN_DEF|CHAR_OCTE&|IS_NULL&
+------------------------------------------------------------------------------
+DEVICEID            |VARCHAR  |NULL|NULL|64    |NULL      |128       |NO
+DATETIME            |TIMESTAMP|9   |10  |29    |NULL      |NULL      |NO
+SMALLPARTICLE       |INTEGER  |0   |10  |10    |NULL      |NULL      |NO
+LARGEPARTICLE       |INTEGER  |0   |10  |10    |NULL      |NULL      |NO
+USERID              |VARCHAR  |NULL|NULL|32    |NULL      |64        |YES
 
-[{"deviceId":"aqm0","userId":"user0","dateTime":"Thu Mar 13 07:29:55 MST 2014","smallParticle":8,"largeParticle":3,"geoLatitude":0.0,"geoLongitude":0.0,"geoMethod":"manual"},{"deviceId":"aqm0","userId":"user0","dateTime":"Thu Mar 13 07:30:55 MST 2014","smallParticle":10,"largeParticle":2,"geoLatitude":33.309986,"geoLongitude":-111.672504,"geoMethod":"manual"}]
-
+TABLE3: aqmdata_sensordrone
+COLUMN_NAME         |TYPE_NAME|DEC&|NUM&|COLUM&|COLUMN_DEF|CHAR_OCTE&|IS_NULL&
+------------------------------------------------------------------------------
+DEVICEID            |VARCHAR  |NULL|NULL|64    |NULL      |128       |NO
+DATETIME            |TIMESTAMP|9   |10  |29    |NULL      |NULL      |NO
+PRESSUREDATA        |INTEGER  |0   |10  |10    |NULL      |NULL      |YES
+TEMPDATA            |INTEGER  |0   |10  |10    |NULL      |NULL      |YES
+CODATA              |INTEGER  |0   |10  |10    |NULL      |NULL      |YES
+HUMIDITYDATA        |INTEGER  |0   |10  |10    |NULL      |NULL      |YES
+CO2SENSORID         |VARCHAR  |NULL|NULL|64    |NULL      |128       |YES
+CO2DATA             |INTEGER  |0   |10  |10    |NULL      |NULL      |YES

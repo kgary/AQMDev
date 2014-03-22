@@ -6,11 +6,11 @@ import java.util.Properties;
 import java.util.TimeZone;
 
 public final class AQMDAOFactory {
-	private static String PROPERTY_FILENAME = "properties/dao.properties";
+	private static final String PROPERTY_FILENAME = "properties/dao.properties";
 	public static final Calendar AQM_CALENDAR = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
 	
     private static IAQMDAO __dao = null;
-    private static Properties        __daoProperties = null;
+    private static Properties __daoProperties = null;
     
     private AQMDAOFactory() {
     	// We do not want this factory instantiated

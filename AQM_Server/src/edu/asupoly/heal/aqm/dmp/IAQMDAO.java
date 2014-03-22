@@ -15,10 +15,12 @@ public interface IAQMDAO {
 
 	public boolean importDylosReading(String toImport) throws Exception;
 	public boolean importSensordroneReading(String toImport) throws Exception;
+	public boolean importReadings(String toImport) throws Exception;
 
 	public JSONArray findDylosReadingsTest() throws Exception;
 	public JSONArray findSensordroneReadingsTest() throws Exception;
-	public JSONArray findServerPushEventTest() throws Exception;
+	public JSONArray findCommonReadingsTest() throws Exception;
+
 
 	public boolean addPushEvent(ServerPushEvent s) throws Exception;
 }

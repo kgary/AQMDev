@@ -11,6 +11,7 @@ public class ServerPushEvent implements JSONStreamAware {
 	public static final int PUSH_UNSET = 0;
 	public static final int SERVER_DYLOS_IMPORT_FAILED = -20;
 	public static final int SERVER_SENSORDRONE_IMPORT_FAILED = -21;
+	public static final int SERVER_IMPORT_FAILED = -22;
 	public static final int SERVER_BAD_OBJECT_TYPE = -2;
 	public static final int SERVER_STREAM_ERROR = -1;
 	public static final int SERVER_STREAM_CORRUPTED_EXCEPTION = -10;

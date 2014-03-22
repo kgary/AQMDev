@@ -15,6 +15,7 @@ import java.util.Properties;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 
 import edu.asupoly.heal.aqm.model.DylosReading;
@@ -98,6 +99,34 @@ public class AQMDAODerbyImpl implements IAQMDAO {
 			}
 		}
 	}
+	
+
+	@Override
+	public boolean importReadings(String toImport) throws Exception {
+		Object obj = JSONValue.parse(toImport);
+		if (obj instanceof JSONArray) {	
+			JSONArray jsonary = (JSONArray) obj;
+			if (jsonary.isEmpty())
+				return false;
+			JSONObject rd = (JSONObject)jsonary.get(0);
+			String type = (String)rd.get("type");
+			if (type.equals("dylos") ) {
+				System.out.println("data type = "+type);
+				return importDylosReading(toImport);
+			}
+		}
+		else if (obj instanceof JSONObject) {
+			JSONObject rd = (JSONObject) obj;
+			if (rd.isEmpty())
+				return false;
+			String type = (String)rd.get("type");
+			if (type.equals("sensordrone")) {
+				System.out.println("data type = "+type);
+				return importSensordroneReading(toImport);
+			}
+		}
+		return false;
+	}
 
 	// received Dylos json string sample:
 	// [{"deviceId":"aqm1","userId":"patient1","dateTime":"Sat Mar 08 22:24:10 MST 2014",
@@ -106,7 +135,8 @@ public class AQMDAODerbyImpl implements IAQMDAO {
 	@Override
 	public boolean importDylosReading(String toImport) throws Exception {
 		Connection c = null;
-		PreparedStatement ps = null;
+		PreparedStatement ps1 = null;
+		PreparedStatement ps2 = null;
 
 		JSONArray jsonary = new JSONArray();
 		JSONParser parser = new JSONParser();
@@ -117,29 +147,33 @@ public class AQMDAODerbyImpl implements IAQMDAO {
 
 		try {
 			c = DriverManager.getConnection(__jdbcURL);
-			ps = c.prepareStatement(__derbyProperties
-					.getProperty("sql.importDylosReadingWithGeo"));
+			c.setAutoCommit(false);
+			ps1 = c.prepareStatement(__derbyProperties.getProperty("sql.importCommonReadings"));
+			ps2 = c.prepareStatement(__derbyProperties.getProperty("sql.importDylosReadings"));
 
 			for (int i = 0; i < jsonary.size(); i++) {
 				jsonobj = (JSONObject) jsonary.get(i);
-				ps.setString(1, (String) jsonobj.get("deviceId"));
-				ps.setString(2, (String) jsonobj.get("userId"));
-
-				String dateTime = (String) jsonobj.get("dateTime");
-				Date d = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy",
-						Locale.US).parse(dateTime);
-				ps.setTimestamp(3, new java.sql.Timestamp(d.getTime()),
-						AQMDAOFactory.AQM_CALENDAR);
 				
-				//ps.setInt(4, (Integer) jsonobj.get("smallParticle")); java.lang.ClassCastException: java.lang.Long cannot be cast to java.lang.Integer
-				ps.setInt(4, ((Long) jsonobj.get("smallParticle")).intValue());
-				ps.setInt(5, ((Long) jsonobj.get("largeParticle")).intValue());
-				ps.setDouble(6, (Double) jsonobj.get("geoLatitude"));
-				ps.setDouble(7, (Double) jsonobj.get("geoLongitude"));
-				ps.setString(8, (String) jsonobj.get("geoMethod"));
-
-				ps.executeUpdate();
-				ps.clearParameters();
+				String dateTime = (String) jsonobj.get("dateTime");
+				Date d = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.US).parse(dateTime);
+				
+				ps1.setString(1, (String) jsonobj.get("deviceId"));
+				ps1.setTimestamp(2, new java.sql.Timestamp(d.getTime()), AQMDAOFactory.AQM_CALENDAR);
+				
+				ps1.setDouble(3, (Double) jsonobj.get("geoLatitude"));
+				ps1.setDouble(4, (Double) jsonobj.get("geoLongitude"));
+				ps1.setString(5, (String) jsonobj.get("geoMethod"));
+							
+				ps2.setString(1, (String) jsonobj.get("deviceId"));
+				ps2.setTimestamp(2, new java.sql.Timestamp(d.getTime()), AQMDAOFactory.AQM_CALENDAR);
+				ps2.setInt(3, ((Long) jsonobj.get("smallParticle")).intValue());
+				ps2.setInt(4, ((Long) jsonobj.get("largeParticle")).intValue());
+				ps2.setString(5, (String) jsonobj.get("userId"));
+				
+				ps1.executeUpdate();
+				ps1.clearParameters();
+				ps2.executeUpdate();
+				ps2.clearParameters();
 			}
 			c.commit();
 
@@ -151,8 +185,10 @@ public class AQMDAODerbyImpl implements IAQMDAO {
 			throw new Exception(t);
 		} finally {
 			try {
-				if (ps != null)
-					ps.close();
+				if (ps1 != null)
+					ps1.close();
+				if (ps2 != null)
+					ps2.close();
 				if (c != null) {
 					c.rollback();
 					c.close();
@@ -172,7 +208,8 @@ public class AQMDAODerbyImpl implements IAQMDAO {
 	@Override
 	public boolean importSensordroneReading(String toImport) throws Exception {
 		Connection c = null;
-		PreparedStatement ps = null;
+		PreparedStatement ps1 = null;
+		PreparedStatement ps2 = null;
 
 		JSONParser parser = new JSONParser();
 		JSONObject jsonobj = new JSONObject();
@@ -182,29 +219,32 @@ public class AQMDAODerbyImpl implements IAQMDAO {
 
 		try {
 			c = DriverManager.getConnection(__jdbcURL);
-			ps = c.prepareStatement(__derbyProperties
-					.getProperty("sql.importSensordroneReadingWithGeo"));
-
-			ps.setString(1, (String) jsonobj.get("deviceId"));
-
+			c.setAutoCommit(false);
+			ps1 = c.prepareStatement(__derbyProperties.getProperty("sql.importCommonReadings"));
+			ps2 = c.prepareStatement(__derbyProperties.getProperty("sql.importSensordroneReadings"));
+			
 			String dateTime = (String) jsonobj.get("dateTime");
-			Date d = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US)
-					.parse(dateTime);
-			ps.setTimestamp(2, new java.sql.Timestamp(d.getTime()),
-					AQMDAOFactory.AQM_CALENDAR);
+			Date d = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).parse(dateTime);
 
-			ps.setString(3, (String) jsonobj.get("co2DeviceID"));
-			ps.setInt(4, ((Long) jsonobj.get("coData")).intValue());
-			ps.setInt(5, ((Long) jsonobj.get("co2Data")).intValue());
-			ps.setInt(6, ((Long) jsonobj.get("presureData")).intValue());
-			ps.setInt(7, ((Long) jsonobj.get("tempData")).intValue());
-			ps.setInt(8, ((Long) jsonobj.get("humidityData")).intValue());
-			ps.setDouble(9, (Double) jsonobj.get("geoLatitude"));
-			ps.setDouble(10, (Double) jsonobj.get("geoLongitude"));
-			ps.setString(11, (String) jsonobj.get("geoMethod"));
-
-			ps.executeUpdate();
-			ps.clearParameters();
+			ps1.setString(1, (String) jsonobj.get("deviceId"));
+			ps1.setTimestamp(2, new java.sql.Timestamp(d.getTime()), AQMDAOFactory.AQM_CALENDAR);
+			ps1.setDouble(3, (Double) jsonobj.get("geoLatitude"));
+			ps1.setDouble(4, (Double) jsonobj.get("geoLongitude"));
+			ps1.setString(5, (String) jsonobj.get("geoMethod"));
+			
+			ps2.setString(1, (String) jsonobj.get("deviceId"));
+			ps2.setTimestamp(2, new java.sql.Timestamp(d.getTime()), AQMDAOFactory.AQM_CALENDAR);
+			ps2.setInt(3, ((Long) jsonobj.get("presureData")).intValue());
+			ps2.setInt(4, ((Long) jsonobj.get("tempData")).intValue());
+			ps2.setInt(5, ((Long) jsonobj.get("coData")).intValue());
+			ps2.setInt(6, ((Long) jsonobj.get("humidityData")).intValue());
+			ps2.setString(7, (String) jsonobj.get("co2DeviceID"));
+			ps2.setInt(8, ((Long) jsonobj.get("co2Data")).intValue());
+			
+			ps1.executeUpdate();
+			ps1.clearParameters();
+			ps2.executeUpdate();
+			ps2.clearParameters();
 			c.commit();
 
 		} catch (SQLException se) {
@@ -215,8 +255,10 @@ public class AQMDAODerbyImpl implements IAQMDAO {
 			throw new Exception(t);
 		} finally {
 			try {
-				if (ps != null)
-					ps.close();
+				if (ps1 != null)
+					ps1.close();
+				if (ps2 != null)
+					ps2.close();
 				if (c != null) {
 					c.rollback();
 					c.close();
@@ -227,112 +269,8 @@ public class AQMDAODerbyImpl implements IAQMDAO {
 		}
 		return true;
 	}
-
-	// [{"deviceId":"aqm1","userId":"patient1","dateTime":"Sat Mar 08 22:24:10 MST 2014",
-	// "smallParticle":76,"largeParticle":16,
-	// "geoLatitude":33.3099177,"geoLongitude":-111.6726974,"geoMethod":"manual"},{...},...]
-	@Override
-	public JSONArray findDylosReadingsTest() throws Exception {
-		Connection c = null;
-		ResultSet rs = null;
-		JSONArray prtrdArray = new JSONArray();
-		try {
-			c = DriverManager.getConnection(__jdbcURL);
-			Statement statement = c.createStatement();
-			statement.setMaxRows(10);
-			rs = statement
-					.executeQuery("select * from particle_reading order by dateTime desc");
-			while (rs.next()) {
-				Timestamp t = rs.getTimestamp("dateTime",
-						AQMDAOFactory.AQM_CALENDAR);
-				Date d = new Date(t.getTime());
-
-				String deviceId = rs.getString("deviceId");
-				String userId = rs.getString("userId");
-				String dateTime = d.toString();
-				int smallParticle = rs.getInt("smallParticle");
-				int largeParticle = rs.getInt("largeParticle");
-				double geoLatitude = rs.getDouble("geoLatitude");
-				double geoLongitude = rs.getDouble("geoLongitude");
-				String geoMethod = rs.getString("geoMethod");
-
-				DylosReading prd = new DylosReading(deviceId, userId, dateTime,
-						smallParticle, largeParticle, geoLatitude,
-						geoLongitude, geoMethod);
-
-				prtrdArray.add(prd);
-			}
-		} catch (SQLException se) {
-			se.printStackTrace();
-			throw new Exception(se);
-		} catch (Throwable t) {
-			t.printStackTrace();
-			throw new Exception(t);
-		} finally {
-			if (c != null)
-				c.close();
-			if (rs != null)
-				rs.close();
-		}
-
-		return prtrdArray;
-	}
-
-	// [{"deviceId":"SensorDroneB8:FF:FE:B9:D9:A0","dateTime":"20140313_195444",
-	// "co2DeviceID":"UNKNOWN","coData":-2,"co2Data":-1,
-	// "presureData":96128,"tempData":27,"humidityData":42,
-	// "geoLatitude":33.2830173,"geoLongitude":-111.7627723,"geoMethod":"Network"},{...},...]
-	@Override
-	public JSONArray findSensordroneReadingsTest() throws Exception {
-		Connection c = null;
-		ResultSet rs = null;
-		JSONArray senrdArray = new JSONArray();
-		try {
-			c = DriverManager.getConnection(__jdbcURL);
-			Statement statement = c.createStatement();
-			statement.setMaxRows(10);
-			rs = statement
-					.executeQuery("select * from sensordrone_reading order by datetime desc");
-			while (rs.next()) {
-				Timestamp t = rs.getTimestamp("dateTime",
-						AQMDAOFactory.AQM_CALENDAR);
-				Date d = new Date(t.getTime());
-
-				String deviceId = rs.getString("deviceId");
-				String dateTime = d.toString();
-				String co2DeviceID = rs.getString("co2DeviceID");
-				int coData = rs.getInt("coData");
-				int co2Data = rs.getInt("co2Data");
-				int presureData = rs.getInt("presureData");
-				int tempData = rs.getInt("tempData");
-				int humidityData = rs.getInt("humidityData");
-				double geoLatitude = rs.getDouble("geoLatitude");
-				double geoLongitude = rs.getDouble("geoLongitude");
-				String geoMethod = rs.getString("geoMethod");
-
-				SensordroneReading ssr = new SensordroneReading(deviceId,
-						dateTime, co2DeviceID, coData, co2Data, presureData,
-						tempData, humidityData, geoLatitude, geoLongitude,
-						geoMethod);
-
-				senrdArray.add(ssr);
-			}
-		} catch (SQLException se) {
-			se.printStackTrace();
-			throw new Exception(se);
-		} catch (Throwable t) {
-			t.printStackTrace();
-			throw new Exception(t);
-		} finally {
-			if (c != null)
-				c.close();
-			if (rs != null)
-				rs.close();
-		}
-
-		return senrdArray;
-	}
-
+	
+	
 	@Override
 	public boolean addPushEvent(ServerPushEvent s) throws Exception {
         if (s == null) return false;
@@ -371,32 +309,46 @@ public class AQMDAODerbyImpl implements IAQMDAO {
 		return true;
 
 	}
+	
 
+	// [{"deviceId":"aqm1","userId":"patient1","dateTime":"Sat Mar 08 22:24:10 MST 2014",
+	// "smallParticle":76,"largeParticle":16,
+	// "geoLatitude":33.3099177,"geoLongitude":-111.6726974,"geoMethod":"manual"},{...},...]
 	@Override
-	public JSONArray findServerPushEventTest() throws Exception {
+	public JSONArray findDylosReadingsTest() throws Exception {
+		int count = 10;
 		Connection c = null;
+		PreparedStatement ps = null;
 		ResultSet rs = null;
-		JSONArray eventArray = new JSONArray();
+		JSONArray rd = new JSONArray();
 		try {
 			c = DriverManager.getConnection(__jdbcURL);
-			Statement statement = c.createStatement();
-			statement.setMaxRows(10);
-			rs = statement
-					.executeQuery("select * from server_push_event where responsecode > 0 order by eventtime desc");
-			while (rs.next()) {
-				Timestamp t = rs.getTimestamp("eventTime",
-						AQMDAOFactory.AQM_CALENDAR);
+//			Statement statement = c.createStatement();
+//			statement.setMaxRows(10);
+//			rs = statement
+//					.executeQuery("select * from particle_reading order by dateTime desc");
+			
+			ps = c.prepareStatement(__derbyProperties.getProperty("sql.findDylosReadingsTest"));
+			rs = ps.executeQuery();
+			while (rs.next() && count > 0) {
+				Timestamp t = rs.getTimestamp("dateTime", AQMDAOFactory.AQM_CALENDAR);
 				Date d = new Date(t.getTime());
-				String eventTime = d.toString();
 
-				int responseCode = rs.getInt("responseCode");
-				int deviceType = rs.getInt("deviceType");
-				String message = rs.getString("message");
-				
-				ServerPushEvent spe = new ServerPushEvent(eventTime,
-						responseCode, deviceType, message);
+				String deviceId = rs.getString("deviceId");
+				String dateTime = d.toString();
+				double geoLatitude = rs.getDouble("latitude");
+				double geoLongitude = rs.getDouble("longitude");
+				String geoMethod = rs.getString("method");
+				int smallParticle = rs.getInt("smallParticle");
+				int largeParticle = rs.getInt("largeParticle");
+				String userId = rs.getString("userId");
 
-				eventArray.add(spe);
+				DylosReading prd = new DylosReading(deviceId, userId, dateTime,
+						smallParticle, largeParticle, geoLatitude,
+						geoLongitude, geoMethod);
+
+				rd.add(prd);
+				count--;
 			}
 		} catch (SQLException se) {
 			se.printStackTrace();
@@ -405,12 +357,112 @@ public class AQMDAODerbyImpl implements IAQMDAO {
 			t.printStackTrace();
 			throw new Exception(t);
 		} finally {
-			if (c != null)
-				c.close();
-			if (rs != null)
-				rs.close();
+			if (c != null) c.close();
+			if (ps != null) ps.close();
+			if (rs != null) rs.close();
 		}
 
-		return eventArray;
+		return rd;
 	}
+
+	// [{"deviceId":"SensorDroneB8:FF:FE:B9:D9:A0","dateTime":"20140313_195444",
+	// "co2DeviceID":"UNKNOWN","coData":-2,"co2Data":-1,
+	// "presureData":96128,"tempData":27,"humidityData":42,
+	// "geoLatitude":33.2830173,"geoLongitude":-111.7627723,"geoMethod":"Network"},{...},...]
+	@Override
+	public JSONArray findSensordroneReadingsTest() throws Exception {
+		int count = 10;
+		Connection c = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		JSONArray rd = new JSONArray();
+		try {
+			c = DriverManager.getConnection(__jdbcURL);
+			ps = c.prepareStatement(__derbyProperties.getProperty("sql.findSensordroneReadingsTest"));
+			rs = ps.executeQuery();
+			while (rs.next() && count > 0) {
+				Timestamp t = rs.getTimestamp("dateTime", AQMDAOFactory.AQM_CALENDAR);
+				Date d = new Date(t.getTime());
+				
+				String deviceId = rs.getString("deviceId");
+				String dateTime = d.toString();
+				double geoLatitude = rs.getDouble("latitude");
+				double geoLongitude = rs.getDouble("longitude");
+				String geoMethod = rs.getString("method");
+				int presureData = rs.getInt("pressureData");
+				int tempData = rs.getInt("tempData");
+				int coData = rs.getInt("coData");
+				int humidityData = rs.getInt("humidityData");
+				String co2DeviceID = rs.getString("co2sensorid");
+				int co2Data = rs.getInt("co2Data");
+				
+				SensordroneReading ssr = new SensordroneReading(deviceId,
+						dateTime, co2DeviceID, coData, co2Data, presureData,
+						tempData, humidityData, geoLatitude, geoLongitude,
+						geoMethod);
+
+				rd.add(ssr);
+				count--;
+			}
+		} catch (SQLException se) {
+			se.printStackTrace();
+			throw new Exception(se);
+		} catch (Throwable t) {
+			t.printStackTrace();
+			throw new Exception(t);
+		} finally {
+			if (c != null) c.close();
+			if (ps != null) ps.close();
+			if (rs != null) rs.close();
+		}
+
+		return rd;
+	}
+
+	@Override
+	public JSONArray findCommonReadingsTest() throws Exception {
+		int count = 10;
+		Connection c = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		JSONArray rd = new JSONArray();
+		try {
+			c = DriverManager.getConnection(__jdbcURL);
+			ps = c.prepareStatement(__derbyProperties.getProperty("sql.findCommonReadingsTest"));
+			rs = ps.executeQuery();
+			while (rs.next() && count > 0) {
+				JSONObject obj = new JSONObject();
+				Timestamp t = rs.getTimestamp("dateTime", AQMDAOFactory.AQM_CALENDAR);
+				Date d = new Date(t.getTime());
+				
+				String deviceId = rs.getString("deviceId");
+				String dateTime = d.toString();
+				double geoLatitude = rs.getDouble("latitude");
+				double geoLongitude = rs.getDouble("longitude");
+				String geoMethod = rs.getString("method");
+				
+				obj.put("deviceId", deviceId);
+				obj.put("dateTime", dateTime);
+				obj.put("geoLatitude", geoLatitude);
+				obj.put("geoLongitude", geoLongitude);
+				obj.put("geoMethod", geoMethod);
+				
+				rd.add(obj);
+				count--;
+			}
+		} catch (SQLException se) {
+			se.printStackTrace();
+			throw new Exception(se);
+		} catch (Throwable t) {
+			t.printStackTrace();
+			throw new Exception(t);
+		} finally {
+			if (c != null) c.close();
+			if (ps != null) ps.close();
+			if (rs != null) rs.close();
+		}
+
+		return rd;
+	}
+
 }
