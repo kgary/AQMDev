@@ -62,23 +62,7 @@ public class GeoLocation extends Service implements LocationListener {
                 // no network provider is enabled
             } else {
                 this.canGetLocation = true;
-                // First get location from Network Provider
-                if (networkEnabled) {
-                    locationManager.requestLocationUpdates(
-                            LocationManager.NETWORK_PROVIDER,
-                            MIN_TIME_BW_UPDATES,
-                            MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
-                    Log.d("Network", "Network");
-                    if (locationManager != null) {
-                        location = locationManager
-                                .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                        if (location != null) {
-                            locLat = location.getLatitude();
-                            locLong = location.getLongitude();
-                        }
-                    }
-                }
-                // if GPS Enabled get lat/long using GPS Services
+                // First GPS Enabled get lat/long using GPS Services
                 if (gpsEnabled) {
                     if (location == null) {
                         locationManager.requestLocationUpdates(
@@ -92,10 +76,30 @@ public class GeoLocation extends Service implements LocationListener {
                             if (location != null) {
                                 locLat = location.getLatitude();
                                 locLong = location.getLongitude();
+                                geoMethod = "GPS";
                             }
                         }
                     }
-                } 
+                }
+                // Get location from Network Provider
+                if (networkEnabled) {
+                	if (location == null) {
+                		locationManager.requestLocationUpdates(
+                            LocationManager.NETWORK_PROVIDER,
+                            MIN_TIME_BW_UPDATES,
+                            MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+                		Log.d("Network", "Network");
+                		if (locationManager != null) {
+                			location = locationManager
+                                .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                			if (location != null) {
+                				locLat = location.getLatitude();
+                				locLong = location.getLongitude();
+                				geoMethod = "Network";
+                			}
+                		}
+                	}
+                }  
             }
  
         } catch (Exception e) {
@@ -140,12 +144,6 @@ public class GeoLocation extends Service implements LocationListener {
     }
     
     public String getGeoMethod(){
-    	if ((location != null) && (gpsEnabled)) {
-    		geoMethod = "GPS";
-    	}
-    	if ((location != null) && (networkEnabled)) {
-    		geoMethod = "Network";
-    	}
 		return geoMethod;
     }
      
