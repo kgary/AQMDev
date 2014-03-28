@@ -1,7 +1,7 @@
 ----------------------------------------------------------------
-Fri Mar 14 02:05:43 MST 2014:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.9.1.0 - (1344872): instance a816c00e-0144-bfd7-03bc-0000033b7690 
-on database directory D:\ASUProject\AQM_Server\derby_server\AQMdb  with class loader sun.misc.Launcher$AppClassLoader@53004901 
+Wed Mar 26 22:11:36 MST 2014:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.9.1.0 - (1344872): instance a816c00e-0145-01f3-57c6-0000033b76d0 
+on database directory D:\ASUProject\AQM_Server\derby_server\aqmsensordb  with class loader sun.misc.Launcher$AppClassLoader@53004901 
 Loaded from file:/D:/ASUProject/AQM_Server/lib/derby.jar
 java.vendor=Sun Microsystems Inc.
 java.runtime.version=1.6.0_45-b06

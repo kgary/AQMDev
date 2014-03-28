@@ -8,7 +8,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StreamCorruptedException;
+import java.io.StringWriter;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
@@ -28,14 +32,88 @@ import edu.asupoly.heal.aqm.model.ServerPushEvent;
 @SuppressWarnings("serial")
 public class AQMImportServlet extends HttpServlet {
 //	private static Date lastImportTime = new Date();
-//	public static final int AIR_QUALITY_READINGS_TYPE = 1;
+//	public static final int DYLOS_READINGS_TYPE = 1;
 //	public static final int SENSORDRONE_READINGS_TYPE = 0;
-//	private static final String[] __TYPES = { "Sensordrone",
-//			"AirQualityReadings" };
+	//private static final String[] __TYPES = { "Sensordrone", "Dylos" };
 
 	public final void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
+		PrintWriter out = null;
+		IAQMDAO dao = AQMDAOFactory.getDAO();
+		try {
+			response.setContentType("text/plain");
+			out = response.getWriter();
+			Map<String, String[]> requestParams = request.getParameterMap();
+			Set set = requestParams.entrySet();
+			Iterator it = set.iterator();
+			if (! it.hasNext()) {
+				out.println("Dylos Reading: ");
+				dao.findDeviceIdinDylos(out);
+				out.println("\n\nSensordrone Reading:");
+				dao.findDeviceIdinSensordrone(out);
+			} else {
+				String deviceid = null;
+				int tail = Integer.MAX_VALUE;
+				String type = null;
+				
+				 while (it.hasNext()) {
+					 Map.Entry<String, String[]> entry = (Map.Entry<String, String[]>) it.next();
+					 String paramName = entry.getKey();
+					 if (!paramName.isEmpty())
+						 System.out.println("paramName = " + paramName);
+					 String[] paramValues = entry.getValue();
+					 
+					 if (paramValues.length == 1) {
+						 String paramValue = paramValues[0];
+						 System.out.println("     , paramValue = " + paramValue);
+						 if (paramName.equals("Dylos") && !paramValue.isEmpty()) {
+							 type = "Dylos";
+							 tail = Integer.parseInt(paramValue);
+						 }
+						 if (paramName.equals("Sensordrone") && !paramValue.isEmpty()) {
+							 type = "Sensordrone";
+							 tail = Integer.parseInt(paramValue);
+						 }
+						 if (paramName.equals("deviceid") && !paramValue.isEmpty()) {
+							 deviceid = paramValue;
+						 }
+					 }
+				 }
+				 if (type != null) {
+					 out.println(type + " Readings:\n ");
+					 JSONArray rd = new JSONArray();
+					 if (type.equals("Dylos")) rd = dao.findDylosReadingsByGroup(deviceid, tail);
+					 else if (type.equals("Sensordrone")) rd = dao.findSensordroneReadingsByGroup(deviceid, tail);
+					 printString(rd, out);
+				 } else if (type == null && deviceid != null) {
+					 out.println("request sample:\n ?Dylos=100&deviceid=aqm0\n ?Sensordrone=20&deviceid=SensorDrone00:00:00:00:00:00"
+					 		+ "\n ?Dylos=50");
+				 }
+			}
 
+		} catch (Throwable t) {
+			t.printStackTrace();
+		} finally {
+            try {
+                if (out != null) {
+                    out.flush();
+                    out.close();
+                }
+            } catch (Throwable t2) {
+                t2.printStackTrace();
+            }
+        }
+	}
+	
+	private void printString(JSONArray rd, PrintWriter out) throws Exception {
+		StringWriter json = new StringWriter();
+		 rd.writeJSONString(json);
+		 //out.println(json.toString() + "\n");
+		 for (int i = 0; i < rd.size(); i++) {
+			 rd = (JSONArray)JSONValue.parse(json.toString());
+			 JSONObject jval= (JSONObject) rd.get(i);
+			 out.println((i+1) + ". "+ jval.toJSONString() + "\n");
+		 }
 	}
 
 	public void doPost(HttpServletRequest request, HttpServletResponse response)

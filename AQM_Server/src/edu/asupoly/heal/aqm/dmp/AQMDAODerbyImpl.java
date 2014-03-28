@@ -1,5 +1,7 @@
 package edu.asupoly.heal.aqm.dmp;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -8,8 +10,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 
@@ -449,6 +453,189 @@ public class AQMDAODerbyImpl implements IAQMDAO {
 				
 				rd.add(obj);
 				count--;
+			}
+		} catch (SQLException se) {
+			se.printStackTrace();
+			throw new Exception(se);
+		} catch (Throwable t) {
+			t.printStackTrace();
+			throw new Exception(t);
+		} finally {
+			if (c != null) c.close();
+			if (ps != null) ps.close();
+			if (rs != null) rs.close();
+		}
+
+		return rd;
+	}
+
+	@Override
+	public void findDeviceIdinDylos(PrintWriter out) throws Exception {
+		Connection c = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		JSONArray rd = new JSONArray();
+		List<String> deviceids = new ArrayList<String>();
+
+		try {
+			c = DriverManager.getConnection(__jdbcURL);
+			ps = c.prepareStatement(__derbyProperties.getProperty("sql.findDeviceIdinDylos"));
+			rs = ps.executeQuery();
+			while (rs.next()) {
+				deviceids.add(rs.getString("deviceid"));
+			}
+			
+			System.out.println(" have "+ deviceids.size() + " deviceids in Dylos." );
+			out.println("  contains "+deviceids.size() +" devices now");
+			for (int i = 0; i < deviceids.size(); i++) {
+				out.println("\n"+ (i+1) +". deviceid=" + deviceids.get(i)+ "\n");
+				rd = findDylosReadingsByGroup(deviceids.get(i), Integer.MAX_VALUE);
+				StringWriter json = new StringWriter();
+				rd.writeJSONString(json);
+				out.print(json.toString() + "\n");
+			}
+			
+		} catch (SQLException se) {
+			se.printStackTrace();
+			throw new Exception(se);
+		} catch (Throwable t) {
+			t.printStackTrace();
+			throw new Exception(t);
+		} finally {
+			if (c != null) c.close();
+			if (ps != null) ps.close();
+			if (rs != null) rs.close();
+		}
+	}
+
+	@Override
+	public void findDeviceIdinSensordrone(PrintWriter out) throws Exception {
+		Connection c = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		JSONArray rd = new JSONArray();
+		List<String> deviceids = new ArrayList<String>();
+
+		try {
+			c = DriverManager.getConnection(__jdbcURL);
+			ps = c.prepareStatement(__derbyProperties.getProperty("sql.findDeviceIdinSensordrone"));
+			rs = ps.executeQuery();
+			while (rs.next()) {
+				deviceids.add(rs.getString("deviceid"));
+			}
+			
+			System.out.println(" have "+ deviceids.size() + " deviceids in Sensordrone." );
+			out.println("  contains "+deviceids.size() +" devices now");
+			for (int i = 0; i < deviceids.size(); i++) {
+				out.println("\n"+ (i+1) +". deviceid=" + deviceids.get(i)+ "\n");
+				rd = findSensordroneReadingsByGroup(deviceids.get(i), Integer.MAX_VALUE);
+				StringWriter json = new StringWriter();
+				rd.writeJSONString(json);
+				out.print(json.toString() + "\n");
+			}
+			
+		} catch (SQLException se) {
+			se.printStackTrace();
+			throw new Exception(se);
+		} catch (Throwable t) {
+			t.printStackTrace();
+			throw new Exception(t);
+		} finally {
+			if (c != null) c.close();
+			if (ps != null) ps.close();
+			if (rs != null) rs.close();
+		}
+	}
+
+	@Override
+	public JSONArray findDylosReadingsByGroup(String deviceid, int tail) throws Exception {
+		if (tail == Integer.MAX_VALUE) tail = 10;
+		Connection c = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		JSONArray rd = new JSONArray();
+		try {
+			c = DriverManager.getConnection(__jdbcURL);
+			ps = c.prepareStatement(__derbyProperties.getProperty("sql.findDylosReadingsByGroup"));
+			if (deviceid == null) 
+				ps.setString(1,  "%");
+			else ps.setString(1, deviceid);
+			
+			rs = ps.executeQuery();
+			while (rs.next() && tail > 0) {
+				Timestamp t = rs.getTimestamp("dateTime", AQMDAOFactory.AQM_CALENDAR);
+				Date d = new Date(t.getTime());
+
+				String deviceId = rs.getString("deviceId");
+				String dateTime = d.toString();
+				double geoLatitude = rs.getDouble("latitude");
+				double geoLongitude = rs.getDouble("longitude");
+				String geoMethod = rs.getString("method");
+				int smallParticle = rs.getInt("smallParticle");
+				int largeParticle = rs.getInt("largeParticle");
+				String userId = rs.getString("userId");
+
+				DylosReading prd = new DylosReading(deviceId, userId, dateTime,
+						smallParticle, largeParticle, geoLatitude,
+						geoLongitude, geoMethod);
+
+				rd.add(prd);
+				tail--;
+			}
+		} catch (SQLException se) {
+			se.printStackTrace();
+			throw new Exception(se);
+		} catch (Throwable t) {
+			t.printStackTrace();
+			throw new Exception(t);
+		} finally {
+			if (c != null) c.close();
+			if (ps != null) ps.close();
+			if (rs != null) rs.close();
+		}
+
+		return rd;
+	}
+
+	@Override
+	public JSONArray findSensordroneReadingsByGroup(String deviceid, int tail) throws Exception {
+		if (tail == Integer.MAX_VALUE) tail = 10;
+		Connection c = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		JSONArray rd = new JSONArray();
+		try {
+			c = DriverManager.getConnection(__jdbcURL);
+			ps = c.prepareStatement(__derbyProperties.getProperty("sql.findSensordroneReadingsByGroup"));
+			ps.setString(1, deviceid);
+			if (deviceid == null) 
+				ps.setString(1,  "%");
+			else ps.setString(1, deviceid);
+			
+			rs = ps.executeQuery();
+			while (rs.next() && tail > 0) {
+				Timestamp t = rs.getTimestamp("dateTime", AQMDAOFactory.AQM_CALENDAR);
+				Date d = new Date(t.getTime());
+				
+				String deviceId = rs.getString("deviceId");
+				String dateTime = d.toString();
+				double geoLatitude = rs.getDouble("latitude");
+				double geoLongitude = rs.getDouble("longitude");
+				String geoMethod = rs.getString("method");
+				int presureData = rs.getInt("pressureData");
+				int tempData = rs.getInt("tempData");
+				int coData = rs.getInt("coData");
+				int humidityData = rs.getInt("humidityData");
+				String co2DeviceID = rs.getString("co2sensorid");
+				int co2Data = rs.getInt("co2Data");
+				
+				SensordroneReading ssr = new SensordroneReading(deviceId,
+						dateTime, co2DeviceID, coData, co2Data, presureData,
+						tempData, humidityData, geoLatitude, geoLongitude,
+						geoMethod);
+
+				rd.add(ssr);
+				tail--;
 			}
 		} catch (SQLException se) {
 			se.printStackTrace();
