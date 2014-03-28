@@ -287,10 +287,10 @@ public class DataSync extends AsyncTask<Void, Void, Void> {
 					JSONObject json_obj = new JSONObject();
 					
 					try {
-						json_obj.put("id", "SensorDrone" + sdMC);
-						json_obj.put("geolatitude", Double.toString(locLat));
-						json_obj.put("geolongitude", Double.toString(locLong));
-						json_obj.put("geomethod", locMethod);
+						json_obj.put("deviceId", "SensorDrone" + sdMC);
+						json_obj.put("geoLatitude", locLat);
+						json_obj.put("geoLongitude", locLong);
+						json_obj.put("geoMethod", locMethod);
 						json_obj.put("dateTime", dateTime);
 						json_obj.put("coData", coData);
 						json_obj.put("co2Data", co2Data);
