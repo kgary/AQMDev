@@ -83,6 +83,7 @@ public class DataSync extends AsyncTask<Void, Void, Void> {
 	DBHumidity humidityData;
 	DBPressure presureData;
 	String co2DevID;
+	int intCoData, intCo2Data, intTemp, intHumidityData, intPressureData;
 
 	DBDataHandler dbHandler;
 
@@ -271,7 +272,11 @@ public class DataSync extends AsyncTask<Void, Void, Void> {
 					long id = myDBHandler.addData(dateTime, coData, co2Data, tempData, humidityData, presureData);
 					// Added Nguyen section
 					
-					
+					intCoData = (int) coData.getValue();
+					intCo2Data = (int) co2Data.getValue();
+					intTemp = (int) tempData.getValue();
+					intHumidityData = (int) humidityData.getValue();
+					intPressureData = (int) presureData.getValue();
 						
 					co2DevID = "UNKNOWN";
 					JSONArray json_data = new JSONArray();
@@ -292,11 +297,11 @@ public class DataSync extends AsyncTask<Void, Void, Void> {
 						json_obj.put("geoLongitude", locLong);
 						json_obj.put("geoMethod", locMethod);
 						json_obj.put("dateTime", dateTime);
-						json_obj.put("coData", coData);
-						json_obj.put("co2Data", co2Data);
-						json_obj.put("tempData", tempData);
-						json_obj.put("humidityData", humidityData);
-						json_obj.put("presureData", presureData);
+						json_obj.put("coData", intCoData);
+						json_obj.put("co2Data", intCo2Data);
+						json_obj.put("tempData", intTemp);
+						json_obj.put("humidityData", intHumidityData);
+						json_obj.put("presureData", intPressureData);
 						json_obj.put("co2DeviceID", co2DevID);
 						
 					} catch (JSONException e1) {
@@ -306,7 +311,7 @@ public class DataSync extends AsyncTask<Void, Void, Void> {
 					
 					
 					Log.d("NguyenDebug","VaLues JSON hash: " + json_obj.toString());
-					Log.d("NguyenDebug","VaLues JSON array: " + json_data.toString());
+					//Log.d("NguyenDebug","VaLues JSON array: " + json_data.toString());
 					try {
 						StringEntity params = new StringEntity(json_data.toString());
 						//Log.d("NguyenDebug","VaLues JSON: " + params);
