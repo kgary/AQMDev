@@ -407,13 +407,22 @@ public class AirQualityMonitor extends Activity {
 			startActivity(setupDrone);
 			return;
 		}
+		//ASU
+		String database_url = myPreferences.getString("database_url", "");
+		if (database_url.equals("")) {
+			//Launch set_database_url_activity
+			Intent setup_db_url = new Intent(getApplicationContext(), DBUrlSetupActivity.class);
+			startActivity(setup_db_url);
+		}
+		
+		//ASU_end
 		faceSwitcher.setImageResource(R.drawable.face_unknown);
 		
 
 		DataSync getData = new DataSync(getApplicationContext(), AirQualityMonitor.this);
 		getData.setSdMC(MAC);
 		getData.setContext(myContext);
-		// Nguyen Added
+		//ASU
 		GeoLocation geoData = new GeoLocation(getApplicationContext());
 		geoData.getLocation();
 
@@ -427,7 +436,7 @@ public class AirQualityMonitor extends Activity {
 			Log.d("NguyenDebug", "Activity LocMethod is " + locMethod);
 		} else {Log.d("NguyenDebug", "geoData is DISABLED");}
 		getData.setLocation(locLat, locLong, locMethod);
-		// Nguyen
+		//ASU_end
 		getData.execute();
 		
 	}

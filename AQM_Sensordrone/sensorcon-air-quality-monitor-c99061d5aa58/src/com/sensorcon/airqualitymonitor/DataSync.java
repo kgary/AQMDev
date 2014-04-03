@@ -11,10 +11,12 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.Builder;
 import android.util.Log;
 import android.widget.Toast;
+
 import com.sensorcon.airqualitymonitor.database.*;
 import com.sensorcon.sensordrone.DroneEventHandler;
 import com.sensorcon.sensordrone.DroneEventObject;
@@ -89,6 +91,10 @@ public class DataSync extends AsyncTask<Void, Void, Void> {
 
 	SharedPreferences myPreferences;
 	Editor prefEditor;
+	
+	//ASU
+	
+	//ASU_end
 
 	private Object lock = new Object();
 
@@ -270,7 +276,7 @@ public class DataSync extends AsyncTask<Void, Void, Void> {
 					DBDataHandler myDBHandler = new DBDataHandler(context);
 					myDBHandler.open();
 					long id = myDBHandler.addData(dateTime, coData, co2Data, tempData, humidityData, presureData);
-					// Added Nguyen section
+					//ASU
 					
 					intCoData = (int) coData.getValue();
 					intCo2Data = (int) co2Data.getValue();
@@ -319,13 +325,18 @@ public class DataSync extends AsyncTask<Void, Void, Void> {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-					
-
+					myPreferences = PreferenceManager
+							.getDefaultSharedPreferences(context);
+					prefEditor = myPreferences.edit();
+					String post_url = myPreferences.getString("database_url", "");
+					Log.d("NguyenDebug","HTTP URL: " + post_url);
 					HttpClient httpClient = new DefaultHttpClient();
+					
 					// TODO blockout for url testing
 					try {
-					    HttpPost request = new HttpPost("http://lead2.poly.asu.edu:8090/AQMEcho/aqmecho");
-					    StringEntity params = new StringEntity(json_obj.toString());
+					    //HttpPost request = new HttpPost("http://lead2.poly.asu.edu:8090/AQMEcho/aqmecho");
+						HttpPost request = new HttpPost(post_url);
+						StringEntity params = new StringEntity(json_obj.toString());
 					    request.addHeader("content-type", "application/x-www-form-urlencoded");
 					    request.setEntity(params);
 					    httpClient.execute(request);
@@ -338,7 +349,7 @@ public class DataSync extends AsyncTask<Void, Void, Void> {
 					}
 					
 					
-					// Nguyen section ended
+					//ASU_end
 					/*
 					Log.d("NguyenDebug","VaLues loaded into database id: " + id);
 					Log.d("NguyenDebug","VaLues loaded into database dateTime: " + dateTime);
