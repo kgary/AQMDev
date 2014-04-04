@@ -27,6 +27,8 @@ public interface IAQMDAO {
 	
 	public JSONArray findDylosReadingsByGroup(String deviceid, int tail) throws Exception;
 	public JSONArray findSensordroneReadingsByGroup(String deviceid, int tail) throws Exception;
+	public JSONArray findDylosReadingsByGroup(String deviceid, int tail, boolean isGeoJson) throws Exception;
+	public JSONArray findSensordroneReadingsByGroup(String deviceid, int tail, boolean isGeoJson) throws Exception;
 
 
 	public boolean addPushEvent(ServerPushEvent s) throws Exception;

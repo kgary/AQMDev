@@ -1,0 +1,15 @@
+*.class
+derby_server/*
+META-INF/*
+WEB-INF/
+
+# Eclipse files
+*.project
+*.classpath
+*.metadata
+
+# ant-generated stuff
+build/*
+
+
+

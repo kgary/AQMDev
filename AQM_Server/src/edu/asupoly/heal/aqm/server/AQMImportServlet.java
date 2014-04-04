@@ -59,13 +59,13 @@ public class AQMImportServlet extends HttpServlet {
 				 while (it.hasNext()) {
 					 Map.Entry<String, String[]> entry = (Map.Entry<String, String[]>) it.next();
 					 String paramName = entry.getKey();
-					 if (!paramName.isEmpty())
-						 System.out.println("paramName = " + paramName);
+//					 if (!paramName.isEmpty())
+//						 System.out.println("paramName = " + paramName);
 					 String[] paramValues = entry.getValue();
 					 
 					 if (paramValues.length == 1) {
 						 String paramValue = paramValues[0];
-						 System.out.println("     , paramValue = " + paramValue);
+						 System.out.println("paramName = " + paramName+ ", paramValue = " + paramValue);
 						 if (paramName.equals("Dylos") && !paramValue.isEmpty()) {
 							 type = "Dylos";
 							 tail = Integer.parseInt(paramValue);

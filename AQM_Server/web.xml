@@ -7,21 +7,21 @@
 	<display-name>AQM web app</display-name>
 
 	<servlet>
-		<servlet-name>AQMServerTest</servlet-name>
-		<servlet-class>edu.asupoly.heal.aqm.test.AQMServletTest</servlet-class>
-	</servlet>
-	<servlet>
 		<servlet-name>AQMImportServlet</servlet-name>
 		<servlet-class>edu.asupoly.heal.aqm.server.AQMImportServlet</servlet-class>
 	</servlet>
+	<servlet>
+		<servlet-name>AQMDisplayServlet</servlet-name>
+		<servlet-class>edu.asupoly.heal.aqm.server.AQMDisplayServlet</servlet-class>
+	</servlet>
 	
-	<servlet-mapping>
-		<servlet-name>AQMServerTest</servlet-name>
-		<url-pattern>/AQMTest</url-pattern>
-	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>AQMImportServlet</servlet-name>
 		<url-pattern>/AQMImport</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>AQMDisplayServlet</servlet-name>
+		<url-pattern>/aqmdisplay</url-pattern>
 	</servlet-mapping>
 
 	<welcome-file-list>

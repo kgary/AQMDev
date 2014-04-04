@@ -548,12 +548,13 @@ public class AQMDAODerbyImpl implements IAQMDAO {
 	}
 
 	@Override
-	public JSONArray findDylosReadingsByGroup(String deviceid, int tail) throws Exception {
+	public JSONArray findDylosReadingsByGroup(String deviceid, int tail, boolean isGeoJson) throws Exception {
 		if (tail == Integer.MAX_VALUE) tail = 10;
 		Connection c = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		JSONArray rd = new JSONArray();
+		JSONArray geoArray = new JSONArray();
 		try {
 			c = DriverManager.getConnection(__jdbcURL);
 			ps = c.prepareStatement(__derbyProperties.getProperty("sql.findDylosReadingsByGroup"));
@@ -578,8 +579,11 @@ public class AQMDAODerbyImpl implements IAQMDAO {
 				DylosReading prd = new DylosReading(deviceId, userId, dateTime,
 						smallParticle, largeParticle, geoLatitude,
 						geoLongitude, geoMethod);
-
 				rd.add(prd);
+
+				JSONObject geojson = prd.getGeoJSONFeature();
+				geoArray.add(geojson);
+				
 				tail--;
 			}
 		} catch (SQLException se) {
@@ -594,16 +598,18 @@ public class AQMDAODerbyImpl implements IAQMDAO {
 			if (rs != null) rs.close();
 		}
 
-		return rd;
+		if (!isGeoJson) return rd;
+		else return geoArray;
 	}
 
 	@Override
-	public JSONArray findSensordroneReadingsByGroup(String deviceid, int tail) throws Exception {
+	public JSONArray findSensordroneReadingsByGroup(String deviceid, int tail, boolean isGeoJson) throws Exception {
 		if (tail == Integer.MAX_VALUE) tail = 10;
 		Connection c = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		JSONArray rd = new JSONArray();
+		JSONArray geoArray = new JSONArray();
 		try {
 			c = DriverManager.getConnection(__jdbcURL);
 			ps = c.prepareStatement(__derbyProperties.getProperty("sql.findSensordroneReadingsByGroup"));
@@ -635,6 +641,10 @@ public class AQMDAODerbyImpl implements IAQMDAO {
 						geoMethod);
 
 				rd.add(ssr);
+				
+				JSONObject geojson = ssr.getGeoJSONFeature();
+				geoArray.add(geojson);
+				
 				tail--;
 			}
 		} catch (SQLException se) {
@@ -649,7 +659,18 @@ public class AQMDAODerbyImpl implements IAQMDAO {
 			if (rs != null) rs.close();
 		}
 
-		return rd;
+		if (!isGeoJson) return rd;
+		else return geoArray;
+	}
+
+	@Override
+	public JSONArray findDylosReadingsByGroup(String deviceid, int tail) throws Exception {
+		return findDylosReadingsByGroup(deviceid, tail, false);
+	}
+
+	@Override
+	public JSONArray findSensordroneReadingsByGroup(String deviceid, int tail) throws Exception {
+		return findSensordroneReadingsByGroup(deviceid, tail, false);
 	}
 
 }
