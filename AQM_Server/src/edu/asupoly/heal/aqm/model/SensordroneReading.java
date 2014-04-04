@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.LinkedHashMap;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.JSONStreamAware;
 import org.json.simple.JSONValue;
 
@@ -54,6 +56,58 @@ public class SensordroneReading implements JSONStreamAware {
 		JSONValue.writeJSONString(obj, out);
 	}
 
+	/*	{
+	  "type": "Feature",
+	  "properties": {...},
+	  "geometry": {
+		"type": "Point",
+		"coordinates": [
+		  63.017578125,
+		  48.10743118848039
+		]
+	  }
+}*/
+
+/*	   "properties":{
+     "type":"Sensordrone",
+	 "deviceId":"SensorDrone00:00:00:00:00:00",
+	 "dateTime":"Fri Mar 21 07:28:55 MST 2014",
+	 "method":"Network",
+	 "co2SensorId":"unknown",
+	 "coData":1,
+	 "co2Data":-1,
+	 "pressureData":96264,
+	 "tempData":24,
+	 "humidityData":34
+ }*/
+public JSONObject getGeoJSONFeature() {
+	JSONObject obj = new JSONObject();
+	JSONObject prop = new JSONObject();
+	JSONObject geo = new JSONObject();
+	JSONArray coord = new JSONArray();
+	obj.put("type", "Feature");
+	obj.put("properties", prop);
+	obj.put("geometry", geo);
+	
+	geo.put("type", "Point");
+	geo.put("coordinates", coord);
+	coord.add(new Double(geoLongitude));
+	coord.add(new Double(geoLatitude));
+	
+	prop.put("type", "Sensordrone");
+	prop.put("deviceId", deviceId);
+	prop.put("dateTime", dateTime);
+	prop.put("method", geoMethod);
+	prop.put("co2SensorId", co2deviceId);
+	prop.put("coData", new Integer(coData));
+	prop.put("co2Data", new Integer(co2Data));
+	prop.put("presureData", new Integer(presureData));
+	prop.put("tempData", new Integer(tempData));
+	prop.put("humidityData", new Integer(humidityData));
+
+	return obj;
+}
+	
 	public String getDeviceId() {
 		return deviceId;
 	}

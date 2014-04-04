@@ -1,51 +1,124 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
-<title>AQM Post Test</title>
-<script>
-function ajaxPost(url, elem) {
- var docelem=document.getElementById(elem);
- var docstr = docelem.value;
- var xmlhttp;
- if (window.XMLHttpRequest) {
-     // code for IE7+, Firefox, Chrome, Opera, Safari
-     xmlhttp=new XMLHttpRequest();
- }
- xmlhttp.open("POST", url, true);
+  <head>
+    <title>AQM Map</title>
+    <style type="text/css">
+      html, body, #map_canvas { 
+	  	height: 100%; 
+		margin: 0px; 
+		padding: 0px; 
+	  }
+	  #infor_string {
+	  line-height:1.35;
+	  overflow:hidden;
+	  white-space:nowrap;}
+    </style>
+    <script
+      src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=visualization">
+    </script>
+    <script type="text/javascript">
+      var map;
+	  var imageURL;
+	  var infowindow;
+	  
+      function initialize() {
+        var mapOptions = {
+          zoom: 12,
+          center: new google.maps.LatLng(33.3,-111.67),
+        };
+        map = new google.maps.Map(document.getElementById('map_canvas'),
+              mapOptions);
+        infowindow = new google.maps.InfoWindow();
+		imageURL = [
+		     'http://maps.google.com/mapfiles/marker.png',
+			'images/darkgreen_MarkerD.png',
+			'images/darkgreen_MarkerS.png',
+			'images/yellow_MarkerD.png',
+			'images/yellow_MarkerS.png',
+			'images/orange_MarkerD.png',
+			'images/orange_MarkerS.png',
+			'images/red_MarkerD.png',
+			'images/red_MarkerS.png'
+		];
 
- //Send the proper header information along with the request
- xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        // Create a <script> tag and set the USGS URL as the source.
+        var script = document.createElement('script');
+        //script.src = 'example_data';
+        script.src = 'http://localhost:8080/AQM/aqmdisplay';
+        document.getElementsByTagName('head')[0].appendChild(script);
+      }
+	  
+	  function getMarkers(i) {
+		  var img = imageURL[i];
+		  return img;
+		  }
+	  
+	  function setContentString(prop) {
+		  var string = '<div id="infor_string">'+
+		  '<div><b>';
+		  string += prop.type + ' - ' + prop.deviceId + '</b></div>';
+		  string += '<div>' + prop.dateTime + '</div>';
+		  string += '<div>' + 'method: ' + prop.method + '</div>';
+		  string += '<p> </p>';
+		  
+          switch (prop.type) {
+          case 'Dylos': 
+        	  string += '<div>' + 'userId: ' + prop.userId + '</div>';
+        	  string += '<div>' + 'smallParticle: ' + prop.smallParticle + '</div>';
+        	  string += '<div>' + 'largeParticle: ' + prop.largeParticle + '</div></div>';
+        	  break;
+          case 'Sensordrone': 
+        	  string += '<div>' + 'co2SensorId: ' + prop.co2SensorId + '</div>';
+        	  string += '<div>' + 'coData: ' + prop.coData + '</div>';
+        	  string += '<div>' + 'co2Data: ' + prop.co2Data + '</div>';
+        	  string += '<div>' + 'pressureData: ' + prop.presureData + '</div>';
+        	  string += '<div>' + 'tempData: ' + prop.tempData + '</div>';
+        	  string += '<div>' + 'humidityData: ' + prop.humidityData + '</div></div>';
+        	  break;
+          default:
+        	  string += '<div> No Data Read</div></div>';
+          }
+ 
+		  return string;
+	  }
+	  	  
+      // Loop through the results array and place a marker for each
+      // set of coordinates.
+      window.search_callback = function(results) {
+        for (var i = 0; i < results.features.length; i++) {
+		  var rd = results.features[i];
+          var coords = rd.geometry.coordinates;
+          var latLng = new google.maps.LatLng(coords[1],coords[0]);
+			
+          var markImage = new Array();
+          switch (rd.properties.type) {
+          case 'Dylos': markImage[i] = getMarkers(1); break;
+          case 'Sensordrone': markImage[i] = getMarkers(2); break;
+          default:
+        	  markImage[i] = getMarkers(0);
+          }
+          
+          var marker = new google.maps.Marker({
+            position: latLng,
+            map: map,
+            title: rd.properties.type,
+			icon: markImage[i]
+          });
 
- xmlhttp.onreadystatechange = function() {
-     //Call a function when the state changes.
-     var respElement = document.getElementById('ServerResponse');
-     var responseMsg = '';
-     if(xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-         responseMsg += xmlhttp.responseText;
-     }
-     else {
-         responseMsg += "Invalid response from server, please re-submit";
-     }
-     respElement.innerHTML = responseMsg;
- }
- xmlhttp.send(docstr);
-}</script>
-</head>
-<body>
-    <textarea rows="15" cols="150">
-sensordrone sample:
-{"coData":-2,"dateTime":"20140321_124956","geoLongitude":-111.6823322,"co2Data":-1,"co2DeviceID":"UNKNOWN","geoMethod":"Network","type":"sensordrone","presureData":96464,"tempData":25,"geoLatitude":33.2993061,"deviceId":"SensorDroneB8:FF:FE:B9:C3:FA","humidityData":32}
-    
-dylos sample:
-[{"type":"dylos","deviceId":"aqm1","userId":"user1","dateTime":"Fri Mar 21 13:27:09 MST 2014","smallParticle":93,"largeParticle":26,"geoLatitude":33.3099177,"geoLongitude":-111.6726974,"geoMethod":"manual"}]
-
-[{"type":"dylos","deviceId":"aqm1","userId":"user1","dateTime":"Fri Mar 21 13:26:39 MST 2014","smallParticle":93,"largeParticle":26,"geoLatitude":33.3099177,"geoLongitude":-111.6726974,"geoMethod":"manual"},{"type":"dylos","deviceId":"aqm1","userId":"user1","dateTime":"Fri Mar 21 13:27:59 MST 2014","smallParticle":93,"largeParticle":26,"geoLatitude":33.3099177,"geoLongitude":-111.6726974,"geoMethod":"manual"}]
-    </textarea>
-    <textarea id="__str" rows="5" cols="80">
-Copy your string content here
-    </textarea>
-    <input type="button" value="submit" onclick="ajaxPost('/AQM/AQMTest', '__str')"/>
-    <div id="ServerResponse"></div>
-</body>
+		  google.maps.event.addListener(marker, 'click', (function(marker, i, rd) {
+		    return function() {
+		    infowindow.close();
+		    infowindow.setContent(setContentString(rd.properties));
+			infowindow.open(map, marker);
+			}
+		  })(marker, i, rd));
+		  
+        }
+      }
+  </script>
+  </head>
+  <body onload="initialize()">
+	<p>AQM Map:</p>
+    <div id="map_canvas"  style="width: 100%; height: 80%;"></div>
+  </body>
 </html>
