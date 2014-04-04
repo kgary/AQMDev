@@ -18,6 +18,7 @@ import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.sensorcon.sensordrone.DroneEventHandler;
 import com.sensorcon.sensordrone.DroneEventObject;
 import com.sensorcon.sensordrone.DroneEventObject.droneEventType;
@@ -165,6 +166,18 @@ public class PreferenceActivity extends Activity{
 		
 		getPreferences();
 		
+		//ASU
+		final Button btnSetUrl = (Button) findViewById(R.id.btnSetUrl);
+		btnSetUrl.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				//Launch set_database_url_activity
+				Intent setup_db_url = new Intent(getApplicationContext(), DBUrlSetupActivity.class);
+				startActivity(setup_db_url);
+			}
+		});
+		//ASU_end
 		
 		// Our background monitoring service
 		aqmService = new Intent(getApplicationContext(), DroneAQMService.class);

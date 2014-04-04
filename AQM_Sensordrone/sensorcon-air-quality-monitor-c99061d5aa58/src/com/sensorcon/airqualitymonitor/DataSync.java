@@ -11,10 +11,12 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.Builder;
 import android.util.Log;
 import android.widget.Toast;
+
 import com.sensorcon.airqualitymonitor.database.*;
 import com.sensorcon.sensordrone.DroneEventHandler;
 import com.sensorcon.sensordrone.DroneEventObject;
@@ -83,11 +85,16 @@ public class DataSync extends AsyncTask<Void, Void, Void> {
 	DBHumidity humidityData;
 	DBPressure presureData;
 	String co2DevID;
+	int intCoData, intCo2Data, intTemp, intHumidityData, intPressureData;
 
 	DBDataHandler dbHandler;
 
 	SharedPreferences myPreferences;
 	Editor prefEditor;
+	
+	//ASU
+	
+	//ASU_end
 
 	private Object lock = new Object();
 
@@ -269,9 +276,13 @@ public class DataSync extends AsyncTask<Void, Void, Void> {
 					DBDataHandler myDBHandler = new DBDataHandler(context);
 					myDBHandler.open();
 					long id = myDBHandler.addData(dateTime, coData, co2Data, tempData, humidityData, presureData);
-					// Added Nguyen section
+					//ASU
 					
-					
+					intCoData = (int) coData.getValue();
+					intCo2Data = (int) co2Data.getValue();
+					intTemp = (int) tempData.getValue();
+					intHumidityData = (int) humidityData.getValue();
+					intPressureData = (int) presureData.getValue();
 						
 					co2DevID = "UNKNOWN";
 					JSONArray json_data = new JSONArray();
@@ -292,11 +303,11 @@ public class DataSync extends AsyncTask<Void, Void, Void> {
 						json_obj.put("geoLongitude", locLong);
 						json_obj.put("geoMethod", locMethod);
 						json_obj.put("dateTime", dateTime);
-						json_obj.put("coData", coData);
-						json_obj.put("co2Data", co2Data);
-						json_obj.put("tempData", tempData);
-						json_obj.put("humidityData", humidityData);
-						json_obj.put("presureData", presureData);
+						json_obj.put("coData", intCoData);
+						json_obj.put("co2Data", intCo2Data);
+						json_obj.put("tempData", intTemp);
+						json_obj.put("humidityData", intHumidityData);
+						json_obj.put("presureData", intPressureData);
 						json_obj.put("co2DeviceID", co2DevID);
 						
 					} catch (JSONException e1) {
@@ -306,7 +317,7 @@ public class DataSync extends AsyncTask<Void, Void, Void> {
 					
 					
 					Log.d("NguyenDebug","VaLues JSON hash: " + json_obj.toString());
-					Log.d("NguyenDebug","VaLues JSON array: " + json_data.toString());
+					//Log.d("NguyenDebug","VaLues JSON array: " + json_data.toString());
 					try {
 						StringEntity params = new StringEntity(json_data.toString());
 						//Log.d("NguyenDebug","VaLues JSON: " + params);
@@ -314,13 +325,18 @@ public class DataSync extends AsyncTask<Void, Void, Void> {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-					
-
+					myPreferences = PreferenceManager
+							.getDefaultSharedPreferences(context);
+					prefEditor = myPreferences.edit();
+					String post_url = myPreferences.getString("database_url", "");
+					Log.d("NguyenDebug","HTTP URL: " + post_url);
 					HttpClient httpClient = new DefaultHttpClient();
+					
 					// TODO blockout for url testing
 					try {
-					    HttpPost request = new HttpPost("http://lead2.poly.asu.edu:8090/AQMEcho/aqmecho");
-					    StringEntity params = new StringEntity(json_obj.toString());
+					    //HttpPost request = new HttpPost("http://lead2.poly.asu.edu:8090/AQMEcho/aqmecho");
+						HttpPost request = new HttpPost(post_url);
+						StringEntity params = new StringEntity(json_obj.toString());
 					    request.addHeader("content-type", "application/x-www-form-urlencoded");
 					    request.setEntity(params);
 					    httpClient.execute(request);
@@ -333,7 +349,7 @@ public class DataSync extends AsyncTask<Void, Void, Void> {
 					}
 					
 					
-					// Nguyen section ended
+					//ASU_end
 					/*
 					Log.d("NguyenDebug","VaLues loaded into database id: " + id);
 					Log.d("NguyenDebug","VaLues loaded into database dateTime: " + dateTime);

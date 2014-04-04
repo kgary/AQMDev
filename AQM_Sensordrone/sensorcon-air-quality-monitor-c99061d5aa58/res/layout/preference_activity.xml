@@ -167,6 +167,11 @@
                 android:layout_height="wrap_content"
                 android:text="CO2 Baseline"
                 android:id="@+id/btnCOO"/>
+        <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/set"
+                android:id="@+id/btnSetUrl"/>
     </LinearLayout>
 
 </ScrollView>
